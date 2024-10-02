@@ -21,7 +21,7 @@ $user_id = $_SESSION['id'];
 // Simpan data transaksi ke tabel (misal: `tb_transaksi`), data ini bisa ditambah atau dikustomisasi sesuai kebutuhan
 $sql = "INSERT INTO tb_transaksi (user_id, first_name, last_name, account_number, phone, bank, total_pembayaran, created_at) 
         VALUES (:user_id, :first_name, :last_name, :account_number, :phone, :bank, :total_pembayaran, NOW())";
-$stmt = $conn->prepare($sql);
+$stmt = $pdo->prepare($sql);
 $stmt->bindParam(':user_id', $user_id);
 $stmt->bindParam(':first_name', $firstName);
 $stmt->bindParam(':last_name', $lastName);

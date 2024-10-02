@@ -17,8 +17,8 @@ $stmt_categories = $pdo->prepare($sql_categories);
 $stmt_categories->execute();
 $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
 
-// Query untuk mengambil data produk kategori "Tenda"
-$stmt = $pdo->query("SELECT * FROM products WHERE kategori = 'Tenda'");
+// Query untuk mengambil data produk kategori "Peralatan Masak"
+$stmt = $pdo->query("SELECT * FROM products WHERE kategori = 'Peralatan Masak'");
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam variabel $products
 ?>
 
@@ -52,6 +52,20 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
 
     <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+
+    <style>
+        /* Animasi muncul dari bawah */
+        body {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        body.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
 </head>
 
 <body>
@@ -90,8 +104,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
                             </div>
                         </div>
                         <a href="orders.php" class="nav-item nav-link">Pesanan</a>
-                        <?php
-                        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                             <a href="adminpanel.php" class="nav-item nav-link">Admin Panel</a>
                         <?php endif; ?>
                         <a href="keranjang.php" class="nav-item nav-link">Keranjang</a>
@@ -104,15 +117,11 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
     </div>
     <!-- Navbar End -->
 
-
     <!-- Rent A Car Start -->
-    <div id="Peralatan Masak" class="container mt-5">
+    <div id="PeralatanMasak" class="container mt-5">
         <h2>Produk Peralatan Masak</h2>
         <div class="row">
             <?php
-            // Hubungkan ke database
-            include 'koneksi.php';
-
             // Query untuk mengambil produk dengan kategori 'Peralatan Masak'
             $sql = "SELECT id, nama, harga, stock, image_url FROM products WHERE kategori = 'Peralatan Masak' LIMIT 3";
             $stmt = $pdo->prepare($sql);
@@ -148,9 +157,6 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
     </div>
     <!-- Rent A Car End -->
 
-
-
-
     <!-- Footer Start -->
     <div class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">
         <div class="row pt-5">
@@ -175,10 +181,8 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
     </div>
     <!-- Footer End -->
 
-
     <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="fa fa-angle-double-up"></i></a>
-
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -192,6 +196,12 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+    <script>
+        // Menambahkan kelas 'visible' untuk memicu animasi saat halaman dimuat
+        document.addEventListener("DOMContentLoaded", function() {
+            document.body.classList.add("visible");
+        });
+    </script>
 </body>
 
 </html>

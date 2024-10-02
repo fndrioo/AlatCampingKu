@@ -94,13 +94,32 @@ foreach ($cart_items as $item) {
         .fade-in.visible {
             opacity: 1;
             transform: translateY(0);
+
+            html,
+            body {
+                height: 100%;
+                /* Membuat tinggi HTML dan body 100% */
+            }
+
+            .container {
+                min-height: calc(100vh - 200px);
+                /* Sesuaikan tinggi agar footer tetap di bawah */
+            }
+
+            footer {
+                position: relative;
+                /* Atur posisi footer */
+                bottom: 0;
+                width: 100%;
+            }
+
         }
     </style>
 </head>
 
 <body>
 
-<!-- Navbar Start -->
+    <!-- Navbar Start -->
     <div class="container-fluid position-relative nav-bar p-0">
         <div class="position-relative px-lg-5" style="z-index: 9;">
             <nav class="navbar navbar-expand-lg bg-secondary navbar-dark py-3 py-lg-0 pl-3 pl-lg-5">
@@ -194,7 +213,8 @@ foreach ($cart_items as $item) {
     <!-- Keranjang End -->
 
     <!-- Footer Start -->
-    <div class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">
+    <!-- Footer Start -->
+    <footer class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">
         <div class="row pt-5">
             <div class="col-lg-3 col-md-6 mb-5">
                 <h4 class="text-uppercase text-primary mb-4">Hubungi Kami</h4>
@@ -214,7 +234,9 @@ foreach ($cart_items as $item) {
                 </div>
             </div>
         </div>
-    </div>
+    </footer>
+    <!-- Footer End -->
+
     <!-- Footer End -->
 
     <!-- Back to Top -->

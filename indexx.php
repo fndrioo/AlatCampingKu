@@ -133,7 +133,7 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
                         <?php endif; ?>
                         <a href="keranjang.php" class="nav-item nav-link">Keranjang</a>
                         <a href="profile.php" class="nav-item nav-link">Profil</a>
-                        <a href="index.html" class="nav-item nav-link">Logout</a>
+                        <a href="logout.php" class="nav-item nav-link">Logout</a>
                     </div>
                 </div>
             </nav>

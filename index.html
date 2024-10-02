@@ -28,9 +28,67 @@
 
     <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+
+    <!-- css -->
+    <style>
+        /* Mengatur tinggi carousel */
+        #header-carousel .carousel-item img {
+            height: 650px;
+            object-fit: cover;
+        }
+
+        /* Mengatur ukuran font di dalam carousel */
+        #header-carousel .carousel-caption h4 {
+            font-size: 1.75rem;
+        }
+
+        #header-carousel .carousel-caption h1 {
+            font-size: 3rem;
+        }
+
+        #header-carousel .carousel-caption .btn {
+            font-size: 1.25rem;
+            padding: 12px 25px;
+        }
+
+        /* Animasi untuk navbar */
+        .nav-bar {
+            transition: all 0.5s ease;
+        }
+
+        .nav-bar.scrolled {
+            background-color: rgba(0, 0, 0, 0.85);
+        }
+
+        /* Animasi muncul dari bawah */
+        .animate__fadeInUp {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Animasi masuk */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
 </head>
 
-<body>
+<body class="fade-in">
     <!-- Navbar Start -->
     <div class="container-fluid position-relative nav-bar p-0">
         <div class="position-relative px-lg-5" style="z-index: 9;">
@@ -44,15 +102,6 @@
                 <div class="collapse navbar-collapse justify-content-between px-3" id="navbarCollapse">
                     <div class="navbar-nav ml-auto py-0">
                         <a href="index.html" class="nav-item nav-link active">Home</a>
-                        <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Kategori Peralatan</a>
-                            <div class="dropdown-menu rounded-0 m-0">
-                                <a href="product.html" class="dropdown-item">Tenda</a>
-                                <a href="product.html" class="dropdown-item">Backpack</a>
-                                <a href="product.html" class="dropdown-item">Kompor</a>
-                            </div>
-                        </div>
-                        <a href="contact.html" class="nav-item nav-link">Contact</a>
                         <a href="Login.php" class="nav-item nav-link">Login</a>
                         <a href="Register.php" class="nav-item nav-link">Register</a>
                     </div>
@@ -61,7 +110,6 @@
         </div>
     </div>
     <!-- Navbar End -->
-
 
     <!-- Carousel Start -->
     <div class="container-fluid p-0" style="margin-bottom: 0;">
@@ -117,7 +165,7 @@
                         <div class="card-body">
                             <h5 class="card-title">Tenda Patagonia</h5>
                             <p class="card-text">Harga Sewa: Rp. 50.000 /Hari</p>
-                            <a href="#" class="btn btn-primary">Detail Produk</a>
+                            <a href="Login.php" class="btn btn-primary">Detail Produk</a>
                         </div>
                     </div>
                 </div>
@@ -127,7 +175,7 @@
                         <div class="card-body">
                             <h5 class="card-title">Tas Decathlon 30L</h5>
                             <p class="card-text">Harga Sewa: Rp. 30.000 /Hari</p>
-                            <a href="#" class="btn btn-primary">Detail Produk</a>
+                            <a href="Login.php" class="btn btn-primary">Detail Produk</a>
                         </div>
                     </div>
                 </div>
@@ -137,7 +185,7 @@
                         <div class="card-body">
                             <h5 class="card-title">Kompor Portable</h5>
                             <p class="card-text">Harga Sewa: Rp. 20.000 /Hari</p>
-                            <a href="#" class="btn btn-primary">Detail Produk</a>
+                            <a href="Login.php" class="btn btn-primary">Detail Produk</a>
                         </div>
                     </div>
                 </div>
@@ -146,68 +194,32 @@
     </div>
     <!-- Produk Unggulan End -->
 
-
     <!-- Footer Start -->
-    <div class="container-fluid bg-secondary py-5 px-sm-3 px-md-5" style="margin-top: 90px;">
+    <div class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">
         <div class="row pt-5">
             <div class="col-lg-3 col-md-6 mb-5">
-                <h4 class="text-uppercase text-light mb-4">Get In Touch</h4>
-                <p class="mb-2"><i class="fa fa-map-marker-alt text-white mr-3"></i>123 Street, New York, USA</p>
-                <p class="mb-2"><i class="fa fa-phone-alt text-white mr-3"></i>+012 345 67890</p>
-                <p><i class="fa fa-envelope text-white mr-3"></i>info@example.com</p>
-                <h6 class="text-uppercase text-white py-2">Follow Us</h6>
-                <div class="d-flex justify-content-start">
-                    <a class="btn btn-lg btn-dark btn-lg-square mr-2" href="#"><i class="fab fa-twitter"></i></a>
-                    <a class="btn btn-lg btn-dark btn-lg-square mr-2" href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a class="btn btn-lg btn-dark btn-lg-square mr-2" href="#"><i class="fab fa-linkedin-in"></i></a>
-                    <a class="btn btn-lg btn-dark btn-lg-square" href="#"><i class="fab fa-instagram"></i></a>
-                </div>
+                <h4 class="text-uppercase text-primary mb-4">Hubungi Kami</h4>
+                <p><i class="fa fa-map-marker-alt mr-2"></i>123 Street, City, Indonesia</p>
+                <p><i class="fa fa-phone-alt mr-2"></i>+012 345 67890</p>
+                <p><i class="fa fa-envelope mr-2"></i>info@example.com</p>
             </div>
             <div class="col-lg-3 col-md-6 mb-5">
-                <h4 class="text-uppercase text-light mb-4">Usefull Links</h4>
-                <div class="d-flex flex-column justify-content-start">
-                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-white mr-2"></i>Private
-                        Policy</a>
-                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-white mr-2"></i>Term &
-                        Conditions</a>
-                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-white mr-2"></i>New Member
-                        Registration</a>
-                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-white mr-2"></i>Affiliate
-                        Programme</a>
-                    <a class="text-body mb-2" href="#"><i class="fa fa-angle-right text-white mr-2"></i>Return &
-                        Refund</a>
-                    <a class="text-body" href="#"><i class="fa fa-angle-right text-white mr-2"></i>Help & FQAs</a>
+                <h4 class="text-uppercase text-primary mb-4">Follow Us</h4>
+                <p>Follow us on our social media accounts</p>
+                <div class="d-flex">
+                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-twitter"></i></a>
+                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-youtube"></i></a>
+                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-instagram"></i></a>
+                    <a class="btn btn-outline-light btn-social" href="#"><i class="fab fa-linkedin-in"></i></a>
                 </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-5">
-                <h4 class="text-uppercase text-light mb-4">Newsletter</h4>
-                <p class="mb-4">Volup amet magna clita tempor. Tempor sea eos vero ipsum. Lorem lorem sit sed elitr sed
-                    kasd et</p>
-                <div class="w-100 mb-3">
-                    <div class="input-group">
-                        <input type="text" class="form-control bg-dark border-dark" style="padding: 25px;"
-                            placeholder="Your Email">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary text-uppercase px-3">Sign Up</button>
-                        </div>
-                    </div>
-                </div>
-                <i>Lorem sit sed elitr sed kasd et</i>
             </div>
         </div>
     </div>
-    <div class="container-fluid bg-dark py-4 px-sm-3 px-md-5">
-        <p class="mb-2 text-center text-body">&copy; <a href="#">AlatCampingKu</a>. All Rights Reserved.</p>
-
-        <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-        <p class="m-0 text-center text-body">Designed by <a href="https://htmlcodex.com">HTML Codex</a></p>
-    </div>
     <!-- Footer End -->
-
 
     <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="fa fa-angle-double-up"></i></a>
-
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -221,6 +233,19 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+    <script>
+        $(window).scroll(function () {
+            if ($(this).scrollTop() > 50) {
+                $('.nav-bar').addClass('scrolled');
+            } else {
+                $('.nav-bar').removeClass('scrolled');
+            }
+        });
+
+        $(document).ready(function () {
+            $('body').addClass('visible');
+        });
+    </script>
 </body>
 
 </html>

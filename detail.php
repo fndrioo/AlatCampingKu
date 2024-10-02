@@ -182,17 +182,13 @@ if (isset($_POST['add_to_cart'])) {
                             <span>Stok Tersedia: <?php echo $product['stock']; ?></span>
                         </div>
                     </div>
-                    <div class="col-md-3 col-6 mb-2">
-                        <form action="add_to_cart.php" method="POST" class="d-flex align-items-center">
+                    <div>
+                        <form action="add_to_cart.php" method="POST"
+                            class="d-flex align-items-center">
                             <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
 
-                            <!-- Tombol Tambah ke Keranjang dipindah ke kiri -->
-                            <button type="submit" name="add_to_cart" class="btn btn-success mr-3" style="width: auto;">
-                                Tambahkan ke Keranjang
-                            </button>
-
                             <!-- Input untuk kuantitas -->
-                            <div class="input-group" style="max-width: 150px;">
+                            <div class="input-group" style="max-width: 200px; flex-grow: 1; margin-right: 10px;">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-outline-secondary" type="button"
                                         id="decreaseQuantity">-</button>
@@ -204,6 +200,11 @@ if (isset($_POST['add_to_cart'])) {
                                         id="increaseQuantity">+</button>
                                 </div>
                             </div>
+
+                            <!-- Tombol Tambah ke Keranjang dipindah ke kiri -->
+                            <button type="submit" name="add_to_cart" class="btn btn-success">
+                                Tambahkan ke Keranjang
+                            </button>
                         </form>
                     </div>
                 </div>

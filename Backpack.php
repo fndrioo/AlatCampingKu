@@ -52,6 +52,20 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
 
     <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+
+    <style>
+        /* Animasi muncul dari bawah */
+        body {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        body.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
 </head>
 
 <body>
@@ -69,29 +83,23 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
                     <div class="navbar-nav ml-auto py-0">
                         <a href="indexx.php" class="nav-item nav-link">Home</a>
                         <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle active" data-toggle="dropdown">Kategori
-                                Peralatan</a>
+                            <a href="#" class="nav-link dropdown-toggle active" data-toggle="dropdown">Kategori Peralatan</a>
                             <div class="dropdown-menu rounded-0 m-0">
                                 <?php foreach ($categories as $category): ?>
                                     <?php if ($category['name'] == 'Tenda'): ?>
-                                        <a href="tenda.php?category_id=<?= $category['id_category'] ?>"
-                                            class="dropdown-item">Tenda</a>
+                                        <a href="tenda.php?category_id=<?= $category['id_category'] ?>" class="dropdown-item">Tenda</a>
                                     <?php elseif ($category['name'] == 'Backpack'): ?>
-                                        <a href="Backpack.php?category_id=<?= $category['id_category'] ?>"
-                                            class="dropdown-item active">Backpack</a>
+                                        <a href="Backpack.php?category_id=<?= $category['id_category'] ?>" class="dropdown-item active">Backpack</a>
                                     <?php elseif ($category['name'] == 'Peralatan Masak'): ?>
-                                        <a href="PeralatanMasak.php?category_id=<?= $category['id_category'] ?>"
-                                            class="dropdown-item">Peralatan Masak</a>
+                                        <a href="PeralatanMasak.php?category_id=<?= $category['id_category'] ?>" class="dropdown-item">Peralatan Masak</a>
                                     <?php else: ?>
-                                        <a href="product.php?category_id=<?= $category['id_category'] ?>"
-                                            class="dropdown-item"><?= htmlspecialchars($category['name']) ?></a>
+                                        <a href="product.php?category_id=<?= $category['id_category'] ?>" class="dropdown-item"><?= htmlspecialchars($category['name']) ?></a>
                                     <?php endif; ?>
                                 <?php endforeach; ?>
                             </div>
                         </div>
                         <a href="orders.php" class="nav-item nav-link">Pesanan</a>
-                        <?php
-                        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                             <a href="adminpanel.php" class="nav-item nav-link">Admin Panel</a>
                         <?php endif; ?>
                         <a href="keranjang.php" class="nav-item nav-link">Keranjang</a>
@@ -126,15 +134,13 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
                 foreach ($backpack_products as $product): ?>
                     <div class="col-md-4 mb-3">
                         <div class="card">
-                            <img class="card-img-top" src="<?= htmlspecialchars($product['image_url']) ?>"
-                                alt="<?= htmlspecialchars($product['nama']) ?>">
+                            <img class="card-img-top" src="<?= htmlspecialchars($product['image_url']) ?>" alt="<?= htmlspecialchars($product['nama']) ?>">
                             <div class="card-body">
                                 <h5 class="card-title"><?= htmlspecialchars($product['nama']) ?></h5>
                                 <p class="card-text">Rp. <?= number_format($product['harga'], 0, ',', '.') ?></p>
                                 <p class="card-text">
                                     Stock: <?= htmlspecialchars($product['stock']) ?>
-                                    <a href="detail.php?id=<?= $product['id'] ?>" class="btn btn-primary btn-sm ml-2">Detail
-                                        Produk</a>
+                                    <a href="detail.php?id=<?= $product['id'] ?>" class="btn btn-primary btn-sm ml-2">Detail Produk</a>
                                 </p>
                             </div>
                         </div>
@@ -145,11 +151,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
             <?php endif; ?>
         </div>
     </div>
-
     <!-- Rent A Car End -->
-
-
-
 
     <!-- Footer Start -->
     <div class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">
@@ -175,10 +177,8 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
     </div>
     <!-- Footer End -->
 
-
     <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="fa fa-angle-double-up"></i></a>
-
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -192,6 +192,12 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+    <script>
+        // Menambahkan kelas 'visible' untuk memicu animasi saat halaman dimuat
+        document.addEventListener("DOMContentLoaded", function() {
+            document.body.classList.add("visible");
+        });
+    </script>
 </body>
 
 </html>

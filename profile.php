@@ -2,9 +2,17 @@
 session_start();
 include 'koneksi.php'; // Koneksi ke database
 
+// Pastikan session ID pengguna ada
+if (!isset($_SESSION['id'])) {
+    header('Location: login.php'); // Redirect ke login jika sesi tidak ada
+    exit;
+}
+
+// Ambil ID user dari sesi
 $user_id = $_SESSION['id'];
 
 try {
+    // Query untuk mendapatkan data pengguna berdasarkan ID dari session
     $query = "SELECT * FROM tb_users WHERE id = :id";
     $stmt = $pdo->prepare($query);
     $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
@@ -14,18 +22,20 @@ try {
     if (!$user) {
         throw new Exception("User not found.");
     }
-
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
-    exit;
+    exit();
 }
 
+// Jika form update profil di-submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Proses update profil
     if (isset($_POST['update_profile'])) {
         $username = $_POST['username'];
         $email = $_POST['email'];
 
         try {
+            // Query untuk update data pengguna
             $update_query = "UPDATE tb_users SET username = :username, email = :email WHERE id = :id";
             $update_stmt = $pdo->prepare($update_query);
             $update_stmt->bindParam(':username', $username);
@@ -33,42 +43,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $update_stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
 
             if ($update_stmt->execute()) {
-                $success_msg = "Profile updated successfully!";
+                $success_msg = "Profil berhasil diperbarui!";
+                // Update session username jika berhasil
+                $_SESSION['username'] = $username;
             } else {
-                $error_msg = "Error updating profile.";
+                $error_msg = "Gagal memperbarui profil.";
             }
         } catch (Exception $e) {
             $error_msg = "Error: " . $e->getMessage();
         }
     }
 
+    // Proses ganti password
     if (isset($_POST['change_password'])) {
         $old_password = $_POST['old_password'];
         $new_password = $_POST['new_password'];
 
+        // Verifikasi password lama
         if (password_verify($old_password, $user['password'])) {
             $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
 
             try {
+                // Query untuk update password
                 $update_password_query = "UPDATE tb_users SET password = :password WHERE id = :id";
                 $update_password_stmt = $pdo->prepare($update_password_query);
                 $update_password_stmt->bindParam(':password', $hashed_password);
                 $update_password_stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
 
                 if ($update_password_stmt->execute()) {
-                    $success_msg = "Password changed successfully!";
+                    $success_msg = "Password berhasil diubah!";
                 } else {
-                    $error_msg = "Error updating password.";
+                    $error_msg = "Gagal mengubah password.";
                 }
             } catch (Exception $e) {
                 $error_msg = "Error: " . $e->getMessage();
             }
         } else {
-            $error_msg = "Old password is incorrect.";
+            $error_msg = "Password lama salah.";
         }
     }
 }
-?>
+?>  
 
 <!DOCTYPE html>
 <html lang="en">
@@ -105,11 +120,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .wider-container {
             max-width: 80%;
         }
+
         .card {
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
+
         .card.visible {
             opacity: 1;
             transform: translateY(0);
@@ -122,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container-fluid position-relative nav-bar p-0">
         <div class="position-relative px-lg-5" style="z-index: 9;">
             <nav class="navbar navbar-expand-lg bg-secondary navbar-dark py-3 py-lg-0 pl-3 pl-lg-5">
-                <a href="indexx.html" class="navbar-brand">
+                <a href="indexx.php" class="navbar-brand">
                     <h1 class="text-uppercase text-primary mb-1">AlatCampingKu</h1>
                 </a>
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
@@ -130,12 +147,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
                 <div class="collapse navbar-collapse justify-content-between px-3" id="navbarCollapse">
                     <div class="navbar-nav ml-auto py-0">
-                        <a href="indexx.html" class="nav-item nav-link">Home</a>
-                        <a href="product.html" class="nav-item nav-link">Kategori Peralatan</a>
-                        <a href="contact.html" class="nav-item nav-link">Contact</a>
-                        <a href="adminpanel.html" class="nav-item nav-link">Admin Panel</a>
-                        <a href="keranjang.html" class="nav-item nav-link">Keranjang</a>
-                        <a href="profile.html" class="nav-item nav-link active">Profil</a>
+                        <a href="indexx.php " class="nav-item nav-link">Home</a>
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Kategori Peralatan</a>
+                            <div class="dropdown-menu rounded-0 m-0">
+                                <?php foreach ($categories as $category): ?>
+                                    <?php if ($category['name'] == 'Tenda'): ?>
+                                        <a href="tenda.php?category_id=<?= $category['id_category'] ?>"
+                                            class="dropdown-item">Tenda</a>
+                                    <?php elseif ($category['name'] == 'Backpack'): ?>
+                                        <a href="Backpack.php?category_id=<?= $category['id_category'] ?>"
+                                            class="dropdown-item">Backpack</a>
+                                    <?php elseif ($category['name'] == 'Peralatan Masak'): ?>
+                                        <a href="PeralatanMasak.php?category_id=<?= $category['id_category'] ?>"
+                                            class="dropdown-item">Peralatan Masak</a>
+                                    <?php else: ?>
+                                        <a href="product.php?category_id=<?= $category['id_category'] ?>"
+                                            class="dropdown-item"><?= htmlspecialchars($category['name']) ?></a>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <a href="orders.php" class="nav-item nav-link">Pesanan</a>
+                        <?php
+                        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                            <a href="adminpanel.php" class="nav-item nav-link">Admin Panel</a>
+                        <?php endif; ?>
+                        <a href="keranjang.php" class="nav-item nav-link">Keranjang</a>
+                        <a href="profile.php" class="nav-item nav-link active">Profil</a>
                         <a href="index.html" class="nav-item nav-link">Logout</a>
                     </div>
                 </div>
@@ -294,22 +333,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- JavaScript for Animation -->
     <script>
-    // Menambahkan event listener untuk scroll
-    window.addEventListener('scroll', function () {
-        const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            // Kode ini bisa dihapus jika tidak ada kebutuhan untuk memeriksa saat scroll
+        // Menambahkan event listener untuk scroll
+        window.addEventListener('scroll', function () {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                // Kode ini bisa dihapus jika tidak ada kebutuhan untuk memeriksa saat scroll
+            });
         });
-    });
 
-    // Jalankan fungsi ini saat halaman pertama kali dimuat
-    window.onload = function() {
-        const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            card.classList.add('visible'); // Tambahkan kelas 'visible' langsung saat load
-        });
-    };
-</script>
+        // Jalankan fungsi ini saat halaman pertama kali dimuat
+        window.onload = function () {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.classList.add('visible'); // Tambahkan kelas 'visible' langsung saat load
+            });
+        };
+    </script>
 
 </body>
 

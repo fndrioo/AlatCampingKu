@@ -3,35 +3,49 @@ require 'koneksi.php';
 session_start();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    // Ambil dan validasi input username dan password
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
 
-    // Check if the user is found
-    $stmt = $pdo->prepare("SELECT * FROM tb_users WHERE username = :username");
-    $stmt->bindParam(':username', $username);
-    $stmt->execute();
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Pastikan username dan password tidak kosong
+    if (empty($username) || empty($password)) {
+        echo "<script>alert('Username dan password tidak boleh kosong.'); window.location.href='login.php';</script>";
+        exit();
+    }
 
-    if ($user) {
-        // Verifikasi password
-        if (password_verify($password, $user['password'])) {
-            // Menyimpan user_id ke dalam session setelah login berhasil
-            $_SESSION['id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['role'] = $user['role'];
+    try {
+        // Query untuk mendapatkan user berdasarkan username
+        $stmt = $pdo->prepare("SELECT * FROM tb_users WHERE username = :username");
+        $stmt->bindParam(':username', $username);
+        $stmt->execute();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Redirection based on role
-            if ($user['role'] == 'admin') {
-                header("Location: adminpanel.php");
+        if ($user) {
+            // Verifikasi password
+            if (password_verify($password, $user['password'])) {
+                // Menyimpan user_id ke dalam session setelah login berhasil
+                $_SESSION['id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'];
+
+                // Redirection berdasarkan role
+                if ($user['role'] == 'admin') {
+                    header("Location: adminpanel.php");
+                } else {
+                    header("Location: indexx.php");
+                }
+                exit();
             } else {
-                header("Location: indexx.php");
+                echo "<script>alert('Password salah! Silakan coba lagi.'); window.location.href='login.php';</script>";
+                exit();
             }
-            exit();
         } else {
-            echo "<script>alert('Login failed! Please check your credentials.'); window.location.href='login.php';</script>";
+            echo "<script>alert('User tidak ditemukan! Silakan coba lagi.'); window.location.href='login.php';</script>";
+            exit();
         }
-    } else {
-        echo "<script>alert('User not found!'); window.location.href='login.php';</script>";
+    } catch (PDOException $e) {
+        // Jika terjadi kesalahan pada query SQL
+        echo "<script>alert('Terjadi kesalahan pada sistem. Silakan coba lagi nanti.'); window.location.href='login.php';</script>";
         exit();
     }
 }
@@ -67,14 +81,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+
+    <style>
+        /* Animasi muncul dari bawah */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
 </head>
 
-<body>
+<body class="fade-in">
     <!-- Navbar Start -->
     <div class="container-fluid position-relative nav-bar p-0">
         <div class="position-relative px-lg-5" style="z-index: 9;">
             <nav class="navbar navbar-expand-lg bg-secondary navbar-dark py-3 py-lg-0 pl-3 pl-lg-5">
-                <a href="indexx.php" class="navbar-brand">
+                <a href="index.html" class="navbar-brand">
                     <h1 class="text-uppercase text-primary mb-1">AlatCampingKu</h1>
                 </a>
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
@@ -82,8 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </button>
                 <div class="collapse navbar-collapse justify-content-between px-3" id="navbarCollapse">
                     <div class="navbar-nav ml-auto py-0">
-                        <a href="indexx.php" class="nav-item nav-link">Home</a>
-                        <a href="shop.php" class="nav-item nav-link">Shop</a>
+                        <a href="index.html" class="nav-item nav-link">Home</a>
                         <a href="login.php" class="nav-item nav-link active">Login</a>
                         <a href="register.php" class="nav-item nav-link">Register</a>
                     </div>
@@ -97,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <div class="card">
+                <div class="card fade-in visible">
                     <div class="card-header text-center">
                         <h2>Login</h2>
                     </div>
@@ -141,6 +168,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('body').addClass('visible');
+        });
+    </script>
 </body>
 
 </html>

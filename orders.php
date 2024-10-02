@@ -2,12 +2,17 @@
 include 'koneksi.php'; // Koneksi ke database
 
 // Ambil semua pesanan dari database
-$sql_orders = "SELECT o.id_order, p.nama AS product_name, o.jumlah, o.total_harga, o.status
-               FROM orders o
-               JOIN products p ON o.id_product = p.id_product";
-$stmt_orders = $conn->prepare($sql_orders);
+$sql_orders = "SELECT tb_orders.id AS id_order, 
+                      p.nama AS product_name, 
+                      tb_orders.quantity AS jumlah, 
+                      tb_orders.total_price AS total_harga, 
+                      tb_orders.order_date AS status
+               FROM tb_orders 
+               JOIN products p ON tb_orders.product_id = p.id";
+$stmt_orders = $pdo->prepare($sql_orders);
 $stmt_orders->execute();
 $orders = $stmt_orders->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
 <!DOCTYPE html>
@@ -43,7 +48,7 @@ $orders = $stmt_orders->fetchAll(PDO::FETCH_ASSOC);
     <div class="container-fluid position-relative nav-bar p-0">
         <div class="position-relative px-lg-5" style="z-index: 9;">
             <nav class="navbar navbar-expand-lg bg-secondary navbar-dark py-3 py-lg-0 pl-3 pl-lg-5">
-                <a href="indexx.html" class="navbar-brand">
+                <a href="indexx.php" class="navbar-brand">
                     <h1 class="text-uppercase text-primary mb-1">AlatCampingKu</h1>
                 </a>
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
@@ -51,19 +56,35 @@ $orders = $stmt_orders->fetchAll(PDO::FETCH_ASSOC);
                 </button>
                 <div class="collapse navbar-collapse justify-content-between px-3" id="navbarCollapse">
                     <div class="navbar-nav ml-auto py-0">
-                        <a href="indexx.html" class="nav-item nav-link">Home</a>
-                        <a href="product.php" class="nav-item nav-link">Produk</a>
+                        <a href="indexx.php " class="nav-item nav-link">Home</a>
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Kategori Peralatan</a>
+                            <div class="dropdown-menu rounded-0 m-0">
+                                <?php foreach ($categories as $category): ?>
+                                    <?php if ($category['name'] == 'Tenda'): ?>
+                                        <a href="tenda.php?category_id=<?= $category['id_category'] ?>"
+                                            class="dropdown-item">Tenda</a>
+                                    <?php elseif ($category['name'] == 'Backpack'): ?>
+                                        <a href="Backpack.php?category_id=<?= $category['id_category'] ?>"
+                                            class="dropdown-item">Backpack</a>
+                                    <?php elseif ($category['name'] == 'Peralatan Masak'): ?>
+                                        <a href="PeralatanMasak.php?category_id=<?= $category['id_category'] ?>"
+                                            class="dropdown-item">Peralatan Masak</a>
+                                    <?php else: ?>
+                                        <a href="product.php?category_id=<?= $category['id_category'] ?>"
+                                            class="dropdown-item"><?= htmlspecialchars($category['name']) ?></a>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
                         <a href="orders.php" class="nav-item nav-link active">Pesanan</a>
-                        <a href="contact.html" class="nav-item nav-link">Contact</a>
-
-                        <!-- Tampilkan hanya jika pengguna adalah admin -->
-                        <?php session_start();
+                        <?php
                         if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                             <a href="adminpanel.php" class="nav-item nav-link">Admin Panel</a>
                         <?php endif; ?>
-
-                        <a href="keranjang.html" class="nav-item nav-link">Keranjang</a>
-                        <a href="logout.php" class="nav-item nav-link">Logout</a>
+                        <a href="keranjang.php" class="nav-item nav-link">Keranjang</a>
+                        <a href="profile.php" class="nav-item nav-link">Profil</a>
+                        <a href="index.html" class="nav-item nav-link">Logout</a>
                     </div>
                 </div>
             </nav>
@@ -95,8 +116,10 @@ $orders = $stmt_orders->fetchAll(PDO::FETCH_ASSOC);
                             <td>Rp. <?= number_format($order['total_harga'], 0, ',', '.') ?></td>
                             <td><?= htmlspecialchars($order['status']) ?></td>
                             <td>
-                                <a href="order_detail.php?id=<?= $order['id_order'] ?>" class="btn btn-sm btn-primary">Detail</a>
-                                <a href="cancel_order.php?id=<?= $order['id_order'] ?>" class="btn btn-sm btn-danger">Cancel</a>
+                                <a href="order_detail.php?id=<?= $order['id_order'] ?>"
+                                    class="btn btn-sm btn-primary">Detail</a>
+                                <a href="cancel_order.php?id=<?= $order['id_order'] ?>"
+                                    class="btn btn-sm btn-danger">Cancel</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>

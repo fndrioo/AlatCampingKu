@@ -19,11 +19,6 @@ $sql = "SELECT tb_keranjang.quantity, tb_keranjang.product_id, tb_keranjang.crea
 $stmt = $pdo->prepare($sql);
 $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
 
-$sql_categories = "SELECT * FROM tb_category";
-$stmt_categories = $pdo->prepare($sql_categories);
-$stmt_categories->execute();
-$categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
-
 if ($stmt->execute()) {
     $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } else {
@@ -35,6 +30,9 @@ $total_belanja = 0;
 foreach ($cart_items as $item) {
     $total_belanja += $item['harga'] * $item['quantity'];
 }
+
+// Ambil token pembayaran dari session jika ada
+$snapToken = isset($_SESSION['snapToken']) ? $_SESSION['snapToken'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -61,6 +59,7 @@ foreach ($cart_items as $item) {
 
     <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+    <script src="https://cdn.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-7983Gt8MB7gdojyE"></script>
 
     <!-- Tambahkan CSS Animasi -->
     <style>
@@ -122,8 +121,7 @@ foreach ($cart_items as $item) {
                             </div>
                         </div>
                         <a href="orders.php" class="nav-item nav-link">Pesanan</a>
-                        <?php
-                        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                             <a href="adminpanel.php" class="nav-item nav-link">Admin Panel</a>
                         <?php endif; ?>
                         <a href="keranjang.php" class="nav-item nav-link">Keranjang</a>
@@ -138,7 +136,7 @@ foreach ($cart_items as $item) {
 
     <!-- Transaction Start -->
     <div class="container mt-5">
-    <h2 class="text-center mb-4">Transaksi Anda</h2>
+        <h2 class="text-center mb-4">Transaksi Anda</h2>
         <div class="row">
             <div class="col-lg-8">
                 <h4 class="mb-3">Detail Pesanan</h4>
@@ -147,21 +145,23 @@ foreach ($cart_items as $item) {
                         <?php foreach ($cart_items as $item): ?>
                             <div class="card p-4 mb-4">
                                 <h5 class="mb-3"><?= htmlspecialchars($item['nama']) ?></h5>
-                                <img src="<?= htmlspecialchars($item['image_url']) ?>" alt="<?= htmlspecialchars($item['nama']) ?>" class="img-fluid mb-3" style="max-width: 200px;">
+                                <img src="<?= htmlspecialchars($item['image_url']) ?>"
+                                    alt="<?= htmlspecialchars($item['nama']) ?>" class="img-fluid mb-3"
+                                    style="max-width: 200px;">
                                 <p>Harga Sewa: <strong>Rp. <?= number_format($item['harga'], 0, ',', '.') ?>/Hari</strong></p>
                                 <p>Jumlah Item: <strong><?= $item['quantity'] ?></strong></p>
-                                <p>Subtotal: <strong>Rp. <?= number_format($item['harga'] * $item['quantity'], 0, ',', '.') ?></strong></p>
+                                <p>Subtotal: <strong>Rp.
+                                        <?= number_format($item['harga'] * $item['quantity'], 0, ',', '.') ?></strong></p>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <p>Keranjang Anda kosong.</p>
                     <?php endif; ?>
                 </div>
-
-                <form action="buktipembayaran.php" method="post">
-                    <!-- Form input pembayaran -->
-                    <button type="submit" class="btn btn-primary">Checkout</button>
-                </form>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paymentModal"
+                    onclick="scrollToTop()">
+                    Checkout
+                </button>
             </div>
 
             <div class="col-lg-4">
@@ -174,6 +174,46 @@ foreach ($cart_items as $item) {
         </div>
     </div>
     <!-- Transaction End -->
+
+    <!-- Modal Pembayaran -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel">Data Pembayaran</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm" action="proses_checkout.php" method="post">
+                        <div class="form-group">
+                            <label for="cardNumber">Nomor Kartu</label>
+                            <input type="text" class="form-control" id="cardNumber" name="card_number" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cardHolder">Nama Pemegang Kartu</label>
+                            <input type="text" class="form-control" id="cardHolder" name="card_holder" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expiryDate">Tanggal Kadaluarsa</label>
+                            <input type="month" class="form-control" id="expiryDate" name="expiry_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cvv">CVV</label>
+                            <input type="text" class="form-control" id="cvv" name="cvv" required>
+                        </div>
+                        <input type="hidden" name="total_payment" value="<?= $total_belanja ?>">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    <button type="submit" form="paymentForm" class="btn btn-primary">Bayar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Pembayaran End -->
 
     <!-- Footer Start -->
     <div class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">
@@ -204,7 +244,36 @@ foreach ($cart_items as $item) {
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.midtrans.com/snap/snap.js" data-client-key="YOUR_CLIENT_KEY"></script>
+    <script>
+            $(document).ready(function() {
+                var snapToken = '<?= $snapToken ?>';
+
+                $('#pay-button').on('click', function() {
+                    if (snapToken) {
+                        snap.pay(snapToken, {
+                            onSuccess: function(result) {
+                                alert("Pembayaran berhasil!");
+                                console.log(result);
+                            },
+                            onPending: function(result) {
+                                alert("Menunggu pembayaran!");
+                                console.log(result);
+                            },
+                            onError: function(result) {
+                                alert("Pembayaran gagal!");
+                                console.log(result);
+                            },
+                            onClose: function() {
+                                alert('Anda menutup pop-up tanpa menyelesaikan pembayaran');
+                            }
+                        });
+                    } else {
+                        alert("Token pembayaran tidak ditemukan.");
+                    }
+                });
+            });
+        </script>
 </body>
 
 </html>
