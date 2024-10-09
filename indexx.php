@@ -127,10 +127,6 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
                             </div>
                         </div>
                         <a href="orders.php" class="nav-item nav-link">Pesanan</a>
-                        <?php
-                        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                            <a href="adminpanel.php" class="nav-item nav-link">Admin Panel</a>
-                        <?php endif; ?>
                         <a href="keranjang.php" class="nav-item nav-link">Keranjang</a>
                         <a href="profile.php" class="nav-item nav-link">Profil</a>
                         <a href="logout.php" class="nav-item nav-link">Logout</a>
@@ -140,7 +136,7 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
     <!-- Navbar End -->
-
+                                        
     <!-- Carousel Start -->
     <div class="container-fluid p-0" style="margin-bottom: 0;">
         <div id="header-carousel" class="carousel slide" data-ride="carousel">

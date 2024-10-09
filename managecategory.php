@@ -63,45 +63,88 @@ if (isset($_GET['edit_id'])) {
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+    <!-- Custom CSS for Layout Fix -->
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            flex-basis: 250px;
+            background-color: #1C1E32;
+            height: 100%;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .footer {
+            background-color: #1C1E32;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .list-group-item {
+            background-color: #343a40;
+            color: #fff;
+        }
+    </style>
 </head>
 <body>
-    <!-- Navbar Start -->
-    <nav class="navbar navbar-expand-lg bg-secondary navbar-dark py-3 px-4">
-        <a href="indexx.html" class="navbar-brand">
-            <h1 class="text-uppercase text-primary mb-1">Admin Panel - AlatCampingKu</h1>
-        </a>
-        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-            <div class="navbar-nav ml-auto py-0">
-                <a href="indexx.php" class="nav-item nav-link">Home</a>
-                <a href="index.html" class="nav-item nav-link">Logout</a>
+    <div class="wrapper">
+        <!-- Navbar Start -->
+        <nav class="navbar navbar-expand-lg bg-secondary navbar-dark py-3 px-4">
+            <a href="adminpanel.php" class="navbar-brand">
+                <h1 class="text-uppercase text-primary mb-1">Admin Panel - AlatCampingKu</h1>
+            </a>
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                <div class="navbar-nav ml-auto py-0">
+                    <a href="index.html" class="nav-item nav-link">Logout</a>
+                </div>
             </div>
-        </div>
-    </nav>
-    <!-- Navbar End -->
+        </nav>
+        <!-- Navbar End -->
 
-    <div class="container-fluid">
-        <div class="row">
+        <!-- Content Wrapper Start -->
+        <div class="content-wrapper">
             <!-- Sidebar Start -->
-            <div class="col-lg-2 bg-dark">
-                <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                    <h4 class="text-light">Admin Menu</h4>
-                    <div class="list-group list-group-flush w-100">
-                        <a href="adminpanel.php" class="list-group-item list-group-item-action bg-dark text-light">Dashboard</a>
-                        <a href="manageproduct.php" class="list-group-item list-group-item-action bg-dark text-light">Manage Products</a>
-                        <a href="manageorder.php" class="list-group-item list-group-item-action bg-dark text-light">Manage Orders</a>
-                        <a href="manageuser.php" class="list-group-item list-group-item-action bg-dark text-light">Manage Users</a>
-                        <a href="managecategory.php" class="list-group-item list-group-item-action bg-dark text-light active">Manage Category</a>
-                        <a href="adminsettings.php" class="list-group-item list-group-item-action bg-dark text-light">Settings</a>
-                    </div>
+            <div class="sidebar">
+                <h4 class="text-light">Admin Menu</h4>
+                <div class="list-group list-group-flush">
+                    <a href="adminpanel.php" class="list-group-item list-group-item-action bg-dark text-light">Dashboard</a>
+                    <a href="manageproduct.php" class="list-group-item list-group-item-action bg-dark text-light">Manage Products</a>
+                    <a href="manageorder.php" class="list-group-item list-group-item-action bg-dark text-light">Manage Orders</a>
+                    <a href="manageuser.php" class="list-group-item list-group-item-action bg-dark text-light">Manage Users</a>
+                    <a href="managecategory.php" class="list-group-item list-group-item-action bg-dark text-light active">Manage Category</a>
+                    <a href="adminsettings.php" class="list-group-item list-group-item-action bg-dark text-light">Settings</a>
                 </div>
             </div>
             <!-- Sidebar End -->
 
             <!-- Main Content Start -->
-            <div class="col-lg-10">
+            <div class="main-content">
                 <div class="container p-4">
                     <h2>Manage Kategori</h2>
                     <p>Here you can manage all the categories listed on AlatCampingKu.</p>
@@ -125,7 +168,7 @@ if (isset($_GET['edit_id'])) {
                                     <td><?php echo htmlspecialchars($category['name']); ?></td>
                                     <td>
                                         <a href="managecategory.php?edit_id=<?php echo $category['id_category']; ?>" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editCategoryModal" data-id="<?php echo $category['id_category']; ?>" data-name="<?php echo htmlspecialchars($category['name']); ?>">Edit</a>
-                                        <a href="managecategory.php?delete_id=<?php echo $category['id_category']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this category?');">Hapus</a>
+                                        <a href="managecategory.php?delete_id=<?php echo $category['id_category']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this category?');">Delete</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -135,6 +178,13 @@ if (isset($_GET['edit_id'])) {
             </div>
             <!-- Main Content End -->
         </div>
+        <!-- Content Wrapper End -->
+
+        <!-- Footer Start -->
+        <div class="footer">
+            <p class="mb-2 text-center text-body">&copy; <a href="#">AlatCampingKu</a>. All Rights Reserved.</p>
+        </div>
+        <!-- Footer End -->
     </div>
 
     <!-- Add Category Modal -->
@@ -174,15 +224,15 @@ if (isset($_GET['edit_id'])) {
                     </button>
                 </div>
                 <form method="post" action="managecategory.php">
+                    <input type="hidden" name="category_id" id="edit_category_id">
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="edit_category_name">Category Name</label>
                             <input type="text" class="form-control" id="edit_category_name" name="category_name" required>
-                            <input type="hidden" id="edit_category_id" name="category_id">
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" name="edit_category" class="btn btn-primary">Save changes</button>
+                        <button type="submit" name="edit_category" class="btn btn-primary">Save Changes</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </form>
@@ -190,28 +240,19 @@ if (isset($_GET['edit_id'])) {
         </div>
     </div>
 
-    <!-- Footer Start -->
-    <div class="container-fluid bg-secondary py-4 px-sm-3 px-md-5">
-        <p class="mb-2 text-center text-body">&copy; <a href="#">AlatCampingKu</a>. All Rights Reserved.</p>
-        <p class="m-0 text-center text-body">Designed by <a href="https://htmlcodex.com">HTML Codex</a></p>
-    </div>
-    <!-- Footer End -->
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Back to Top -->
-    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="fa fa-angle-double-up"></i></a>
-
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-    <!-- JavaScript for handling modal data -->
+    <!-- Custom JS for Modal -->
     <script>
         $('#editCategoryModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
             var categoryId = button.data('id');
             var categoryName = button.data('name');
             var modal = $(this);
-            modal.find('#edit_category_name').val(categoryName);
             modal.find('#edit_category_id').val(categoryId);
+            modal.find('#edit_category_name').val(categoryName);
         });
     </script>
 </body>

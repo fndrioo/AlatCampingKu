@@ -44,6 +44,27 @@ if (isset($_POST['delete'])) {
 $stmt = $pdo->prepare("SELECT id, username, email, role, status FROM tb_users");
 $stmt->execute();
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Tentukan jumlah pengguna per halaman
+$limit = 10; // Jumlah baris yang ditampilkan per halaman
+
+// Dapatkan halaman saat ini dari URL, jika tidak ada default ke halaman 1
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+$start = ($page > 1) ? ($page * $limit) - $limit : 0;
+
+// Menghitung total pengguna
+$stmt = $pdo->prepare("SELECT COUNT(*) AS total_users FROM tb_users");
+$stmt->execute();
+$total_users = $stmt->fetch(PDO::FETCH_ASSOC)['total_users'];
+
+// Mengambil data pengguna dari database dengan batasan limit dan offset
+$stmt = $pdo->prepare("SELECT id, username, email, role, status FROM tb_users LIMIT ?, ?");
+$stmt->bindValue(1, $start, PDO::PARAM_INT);
+$stmt->bindValue(2, $limit, PDO::PARAM_INT);
+$stmt->execute();
+$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Menghitung total halaman
+$total_pages = ceil($total_users / $limit);
 ?>
 
 <!DOCTYPE html>
@@ -91,7 +112,6 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </button>
         <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
             <div class="navbar-nav ml-auto py-0">
-                <a href="indexx.html" class="nav-item nav-link">Home</a>
                 <a href="index.html" class="nav-item nav-link">Logout</a>
             </div>
         </div>
@@ -101,30 +121,34 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar Start -->
-            <div class="col-lg-2 bg-dark">
-                <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                    <h4 class="text-light">Admin Menu</h4>
-                    <div class="list-group list-group-flush w-100">
-                        <a href="adminpanel.php"
-                            class="list-group-item list-group-item-action bg-dark text-light">Dashboard</a>
-                        <a href="manageproduct.php"
-                            class="list-group-item list-group-item-action bg-dark text-light">Manage Products</a>
-                        <a href="manageorder.php"
-                            class="list-group-item list-group-item-action bg-dark text-light">Manage Orders</a>
-                        <a href="manageuser.php"
-                            class="list-group-item list-group-item-action bg-dark text-light active">Manage Users</a>
-                        <a href="settings.php"
-                            class="list-group-item list-group-item-action bg-dark text-light">Settings</a>
+            <div class="container-fluid d-flex">
+                <div class="row flex-grow-1">
+                    <!-- Sidebar Start -->
+                    <div class="col-lg-2 bg-dark h-100 d-flex flex-column">
+                        <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+                            <h4 class="text-light">Admin Menu</h4>
+                            <div class="list-group list-group-flush w-100">
+                                <a href="adminpanel.php"
+                                    class="list-group-item list-group-item-action bg-dark text-light">Dashboard</a>
+                                <a href="manageproduct.php"
+                                    class="list-group-item list-group-item-action bg-dark text-light">Manage
+                                    Products</a>
+                                <a href="manageorder.php"
+                                    class="list-group-item list-group-item-action bg-dark text-light">Manage Orders</a>
+                                <a href="manageuser.php"
+                                    class="list-group-item list-group-item-action bg-dark text-light">Manage Users</a>
+                                <a href="managecategory.php"
+                                    class="list-group-item list-group-item-action bg-dark text-light">Manage
+                                    Category</a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <!-- Sidebar End -->
+                    <!-- Sidebar End -->
 
             <!-- Main Content Start -->
             <div class="col-lg-10">
                 <div class="container p-4">
                     <h2>Manage Users</h2>
-                    <p>Here you can manage all the users registered on AlatCampingKu.</p>
 
                     <!-- Add New User Button -->
                     <button class="btn btn-primary" data-toggle="modal" data-target="#addUserModal">Add New
@@ -223,6 +247,28 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+
+                    <!-- Pagination Links -->
+                    <nav>
+                        <ul class="pagination">
+                            <?php if ($page > 1): ?>
+                                <li class="page-item"><a class="page-link"
+                                        href="?page=<?php echo $page - 1; ?>"><</a></li>
+                            <?php endif; ?>
+                            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                <li class="page-item <?php if ($i == $page)
+                                    echo 'active'; ?>">
+                                    <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                                </li>
+                            <?php endfor; ?>
+
+                            <?php if ($page < $total_pages): ?>
+                                <li class="page-item"><a class="page-link" href="?page=<?php echo $page + 1; ?>">></a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+
                 </div>
             </div>
             <!-- Main Content End -->

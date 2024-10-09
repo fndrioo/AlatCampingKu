@@ -89,7 +89,6 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </button>
         <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
             <div class="navbar-nav ml-auto py-0">
-                <a href="indexx.php" class="nav-item nav-link">Home</a>
                 <a href="index.html" class="nav-item nav-link">Logout</a>
             </div>
         </div>
@@ -118,8 +117,6 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <a href="managecategory.php"
                                     class="list-group-item list-group-item-action bg-dark text-light">Manage
                                     Category</a>
-                                <a href="adminsettings.php"
-                                    class="list-group-item list-group-item-action bg-dark text-light">Settings</a>
                             </div>
                         </div>
                     </div>
@@ -239,7 +236,6 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <!-- Footer Start -->
             <footer class="container-fluid bg-dark py-4 px-sm-3 px-md-5 mt-auto">
                 <p class="mb-2 text-center text-body">&copy; <a href="#">AlatCampingKu</a>. All Rights Reserved.</p>
-                <p class="m-0 text-center text-body">Designed by <a href="https://htmlcodex.com">HTML Codex</a></p>
             </footer>
             <!-- Footer End -->
 

@@ -55,7 +55,6 @@ if (isset($_POST['add_to_cart'])) {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -81,7 +80,6 @@ if (isset($_POST['add_to_cart'])) {
 
     <!-- Animasi fade-in -->
     <style>
-        /* Animasi umum untuk halaman */
         .fade-in {
             opacity: 0;
             transform: translateY(20px);
@@ -93,17 +91,37 @@ if (isset($_POST['add_to_cart'])) {
             transform: translateY(0);
         }
 
-        /* Style CSS tambahan */
         .input-group .btn {
             width: 60px;
-            /* Sesuaikan dengan kebutuhan */
             padding: 5px;
         }
 
         .input-group .form-control {
             width: 60px;
-            /* Sesuaikan lebar input agar pas */
             text-align: center;
+        }
+
+        .product-price h4 {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 500;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .product-detail-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 30px;
+        }
+
+        .product-detail-image img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .product-detail-info {
+            flex-grow: 1;
         }
     </style>
 </head>
@@ -161,30 +179,34 @@ if (isset($_POST['add_to_cart'])) {
     <div class="container-fluid pt-5 fade-in">
         <div class="container pt-5">
             <div class="row">
-                <div class="col-lg-8 mb-5">
-                    <h1 class="display-4 text-uppercase mb-5"><?php echo $product['nama']; ?></h1>
-                    <div class="row mx-n2 mb-3">
-                        <div class="col-md-6 col-12 px-2 pb-2">
-                            <img class="img-fluid w-100" src="<?php echo $product['image_url']; ?>"
-                                alt="<?php echo $product['nama']; ?>">
-                        </div>
+                <div class="product-detail-container">
+                    <!-- Gambar Produk -->
+                    <div class="product-detail-image">
+                        <img src="<?php echo $product['image_url']; ?>" alt="<?php echo $product['nama']; ?>">
                     </div>
-                    <p><?php echo $product['description']; ?></p>
-                    <div class="row pt-2">
-                        <div class="col-md-3 col-6 mb-2">
-                            <span>Kategori: <?php echo $product['kategori']; ?></span>
+
+                    <!-- Detail Produk -->
+                    <div class="product-detail-info">
+                        <h1 class="display-4 text-uppercase mb-3"><?php echo $product['nama']; ?></h1>
+                        <p><?php echo $product['description']; ?></p>
+                        <div class="row pt-2">
+                            <div class="col-md-12 mb-2">
+                                <span>Kategori: <?php echo $product['kategori']; ?></span>
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <span>Stok Tersedia: <?php echo $product['stock']; ?></span>
+                            </div>
                         </div>
-                        <div class="col-md-3 col-6 mb-2">
-                            <span>Harga Sewa: Rp. <?php echo number_format($product['harga'], 0, ',', '.'); ?>
-                                /Hari</span>
+
+                        <!-- Harga Produk -->
+                        <div class="product-price mb-3">
+                            <h4 class="text-uppercase" style="font-size: 1.5rem;">
+                                Rp. <?php echo number_format($product['harga'], 0, ',', '.'); ?> /Hari
+                            </h4>
                         </div>
-                        <div class="col-md-3 col-6 mb-2">
-                            <span>Stok Tersedia: <?php echo $product['stock']; ?></span>
-                        </div>
-                    </div>
-                    <div>
-                        <form action="add_to_cart.php" method="POST"
-                            class="d-flex align-items-center">
+
+                        <!-- Form untuk menambah ke keranjang -->
+                        <form action="add_to_cart.php" method="POST" class="d-flex align-items-center">
                             <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
 
                             <!-- Input untuk kuantitas -->
@@ -201,7 +223,7 @@ if (isset($_POST['add_to_cart'])) {
                                 </div>
                             </div>
 
-                            <!-- Tombol Tambah ke Keranjang dipindah ke kiri -->
+                            <!-- Tombol Tambah ke Keranjang -->
                             <button type="submit" name="add_to_cart" class="btn btn-success">
                                 Tambahkan ke Keranjang
                             </button>
@@ -210,7 +232,6 @@ if (isset($_POST['add_to_cart'])) {
                 </div>
             </div>
         </div>
-    </div>
     </div>
     <!-- Detail End -->
 
@@ -238,44 +259,34 @@ if (isset($_POST['add_to_cart'])) {
     </div>
     <!-- Footer End -->
 
-    <!-- JavaScript untuk memicu animasi saat halaman dimuat -->
+    <!-- Script untuk animasi fade-in -->
     <script>
-        window.addEventListener('load', function () {
-            var elements = document.querySelectorAll('.fade-in');
-            elements.forEach(function (element) {
-                element.classList.add('show');
-            });
-        });
+        window.onload = function () {
+            document.querySelector('.fade-in').classList.add('show');
+        };
 
-        // Script untuk mengubah jumlah produk
-        document.getElementById('decreaseQuantity').addEventListener('click', function () {
-            var quantityInput = document.getElementById('quantity');
-            var currentValue = parseInt(quantityInput.value);
-            if (currentValue > 1) {
-                quantityInput.value = currentValue - 1;
+        // Script untuk tambah/kurang kuantitas
+        const decreaseButton = document.getElementById('decreaseQuantity');
+        const increaseButton = document.getElementById('increaseQuantity');
+        const quantityInput = document.getElementById('quantity');
+
+        decreaseButton.addEventListener('click', function () {
+            let currentQuantity = parseInt(quantityInput.value);
+            if (currentQuantity > 1) {
+                quantityInput.value = currentQuantity - 1;
             }
         });
 
-        document.getElementById('increaseQuantity').addEventListener('click', function () {
-            var quantityInput = document.getElementById('quantity');
-            var maxValue = parseInt(quantityInput.getAttribute('max'));
-            var currentValue = parseInt(quantityInput.value);
-            if (currentValue < maxValue) {
-                quantityInput.value = currentValue + 1;
+        increaseButton.addEventListener('click', function () {
+            let currentQuantity = parseInt(quantityInput.value);
+            if (currentQuantity < <?= $product['stock'] ?>) {
+                quantityInput.value = currentQuantity + 1;
             }
         });
     </script>
 
-    <!-- Libraries & Template Javascript -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-    <script src="lib/easing/easing.min.js"></script>
-    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
-    <script src="lib/tempusdominus/js/moment.min.js"></script>
-    <script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
-    <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
-
-    <script src="js/main.js"></script>
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
 </body>
 
 </html>
