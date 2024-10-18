@@ -2,6 +2,30 @@
 session_start();
 include 'koneksi.php'; // Koneksi ke database
 
+// Menentukan jumlah produk per halaman
+$products_per_page = 10;
+
+// Mendapatkan halaman saat ini dari parameter URL
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+$start_from = ($page - 1) * $products_per_page;
+
+// Ambil total produk dari database untuk menghitung total halaman
+$sql_total = "SELECT COUNT(*) FROM products";
+$stmt_total = $pdo->prepare($sql_total);
+$stmt_total->execute();
+$total_products = $stmt_total->fetchColumn();
+
+// Menghitung jumlah total halaman
+$total_pages = ceil($total_products / $products_per_page);
+
+// Ambil produk yang sesuai dengan halaman saat ini
+$sql = "SELECT * FROM products LIMIT ?, ?";
+$stmt = $pdo->prepare($sql);
+$stmt->bindValue(1, $start_from, PDO::PARAM_INT);
+$stmt->bindValue(2, $products_per_page, PDO::PARAM_INT);
+$stmt->execute();
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 // Cek apakah form add, edit, atau delete telah dikirim
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add_product'])) {
@@ -38,12 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$id]);
     }
 }
-
-// Ambil semua produk dari database
-$sql = "SELECT * FROM products";
-$stmt = $pdo->prepare($sql);
-$stmt->execute();
-$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -71,6 +89,9 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
     <link href="lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />
 
+    <!-- AOS Animation -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
@@ -95,13 +116,13 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </nav>
     <!-- Navbar End -->
 
-    <div class="container-fluid">
+    <nav class="container-fluid">
         <div class="row">
-            <!-- Sidebar Start -->
             <div class="container-fluid d-flex">
                 <div class="row flex-grow-1">
                     <!-- Sidebar Start -->
-                    <div class="col-lg-2 bg-dark h-100 d-flex flex-column">
+                    <div class="col-lg-2 bg-dark d-flex flex-column" style="height:900px" data-aos="fade-right"
+                        data-aos-duration="1000">
                         <div class="d-flex flex-column align-items-center text-center p-3 py-5">
                             <h4 class="text-light">Admin Menu</h4>
                             <div class="list-group list-group-flush w-100">
@@ -130,12 +151,13 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                             <!-- Add Product Button -->
                             <div class="mb-4">
-                                <button class="btn btn-primary" data-toggle="modal" data-target="#productModal">Add New
-                                    Product</button>
+                                <button class="btn btn-primary" data-aos="fade-in" data-aos-duration="800"
+                                    data-toggle="modal" data-target="#productModal">Add New Product</button>
                             </div>
 
                             <!-- Products Table -->
-                            <table class="table table-bordered table-striped">
+                            <table class="table table-bordered table-striped" data-aos="fade-up"
+                                data-aos-duration="1000">
                                 <thead>
                                     <tr>
                                         <th>Product ID</th>
@@ -174,122 +196,126 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
+
+                            <!-- Pagination -->
+                            <ul class="pagination">
+                                <li class="page-item <?php if ($page <= 1)
+                                    echo 'disabled'; ?>">
+                                    <a class="page-link" href="?page=<?php echo $page - 1; ?>">Previous</a>
+                                </li>
+                                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                    <li class="page-item <?php if ($page == $i)
+                                        echo 'active'; ?>">
+                                        <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                                    </li>
+                                <?php endfor; ?>
+                                <li class="page-item <?php if ($page >= $total_pages)
+                                    echo 'disabled'; ?>">
+                                    <a class="page-link" href="?page=<?php echo $page + 1; ?>">Next</a>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                     <!-- Main Content End -->
                 </div>
             </div>
+        </div>
+    </nav>
 
-            <!-- Product Modal Start -->
-            <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <form action="" method="POST">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="productModalLabel">Add New Product</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <input type="hidden" name="id" id="product-id">
-                                <div class="form-group">
-                                    <label for="product-name">Name</label>
-                                    <input type="text" class="form-control" name="nama" id="product-name" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="product-category">Category</label>
-                                    <input type="text" class="form-control" name="kategori" id="product-category"
-                                        required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="product-price">Price</label>
-                                    <input type="number" class="form-control" name="harga" id="product-price" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="product-stock">Stock</label>
-                                    <input type="number" class="form-control" name="stock" id="product-stock" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="product-image">Image URL</label>
-                                    <input type="text" class="form-control" name="image_url" id="product-image">
-                                </div>
-                                <div class="form-group">
-                                    <label for="product-description">Description</label>
-                                    <textarea class="form-control" name="description"
-                                        id="product-description"></textarea>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="submit" name="add_product" class="btn btn-primary">Save changes</button>
-                                <button type="submit" name="edit_product" class="btn btn-primary" id="edit-product-btn"
-                                    style="display:none;">Update Product</button>
-                            </div>
-                        </form>
-                    </div>
+    <!-- Product Modal -->
+    <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" data-aos="zoom-in" data-aos-duration="500">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalLabel">Add/Edit Product</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="productForm" action="" method="POST">
+                        <input type="hidden" name="id" id="productId">
+                        <div class="form-group">
+                            <label for="productName">Product Name</label>
+                            <input type="text" class="form-control" name="nama" id="productName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productCategory">Category</label>
+                            <input type="text" class="form-control" name="kategori" id="productCategory" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productPrice">Price</label>
+                            <input type="number" class="form-control" name="harga" id="productPrice" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productStock">Stock</label>
+                            <input type="number" class="form-control" name="stock" id="productStock" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productImageUrl">Image URL</label>
+                            <input type="text" class="form-control" name="image_url" id="productImageUrl" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productDescription">Description</label>
+                            <textarea class="form-control" name="description" id="productDescription" rows="3"
+                                required></textarea>
+                        </div>
+                        <button type="submit" name="add_product" class="btn btn-primary">Save</button>
+                        <button type="submit" name="edit_product" class="btn btn-warning">Update</button>
+                    </form>
                 </div>
             </div>
-            <!-- Product Modal End -->
+        </div>
+    </div>
 
-            <!-- Footer Start -->
-            <footer class="container-fluid bg-dark py-4 px-sm-3 px-md-5 mt-auto">
-                <p class="mb-2 text-center text-body">&copy; <a href="#">AlatCampingKu</a>. All Rights Reserved.</p>
-            </footer>
-            <!-- Footer End -->
+    <!-- Footer Start -->
+    <div class="footer">
+        <p class="mb-2 text-center text-body">&copy; <a href="#">AlatCampingKu</a>. All Rights Reserved.</p>
+    </div>
+    <!-- Footer End -->
 
-            <!-- Back to Top -->
-            <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i
-                    class="fa fa-angle-double-up"></i></a>
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-secondary back-to-top" style="position: fixed; bottom: 20px; right: 20px;">
+        <i class="fa fa-chevron-up"></i>
+    </a>
 
-            <!-- JavaScript Libraries -->
-            <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-            <script src="lib/easing/easing.min.js"></script>
-            <script src="lib/waypoints/waypoints.min.js"></script>
-            <script src="lib/owlcarousel/owl.carousel.min.js"></script>
-            <script src="lib/tempusdominus/js/moment.min.js"></script>
-            <script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
-            <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
+    <!-- JavaScript Libraries -->
+    <script src="lib/jquery/jquery.min.js"></script>
+    <script src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+    <script src="lib/tempusdominus/js/moment.min.js"></script>
+    <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
 
-            <!-- Template Javascript -->
-            <script src="js/main.js"></script>
+    <!-- AOS Animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        AOS.init();
 
-            <script>
-                // Script to handle modal data filling for edit
-                $('#productModal').on('show.bs.modal', function (event) {
-                    var button = $(event.relatedTarget);
-                    var modal = $(this);
-
-                    var id = button.data('id');
-                    if (id) {
-                        modal.find('.modal-title').text('Edit Product');
-                        modal.find('#edit-product-btn').show();
-                        modal.find('[name="add_product"]').hide();
-
-                        modal.find('#product-id').val(id);
-                        modal.find('#product-name').val(button.data('nama'));
-                        modal.find('#product-category').val(button.data('kategori'));
-                        modal.find('#product-price').val(button.data('harga'));
-                        modal.find('#product-stock').val(button.data('stock'));
-                        modal.find('#product-image').val(button.data('image_url'));
-                        modal.find('#product-description').val(button.data('description'));
-                    } else {
-                        modal.find('.modal-title').text('Add New Product');
-                        modal.find('#edit-product-btn').hide();
-                        modal.find('[name="add_product"]').show();
-
-                        modal.find('#product-id').val('');
-                        modal.find('#product-name').val('');
-                        modal.find('#product-category').val('');
-                        modal.find('#product-price').val('');
-                        modal.find('#product-stock').val('');
-                        modal.find('#product-image').val('');
-                        modal.find('#product-description').val('');
-                    }
-                });
-            </script>
+        // Script untuk mengisi data pada modal saat edit
+        $('#productModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var modal = $(this);
+            if (button.data('id')) {
+                // Edit product
+                modal.find('#productModalLabel').text('Edit Product');
+                modal.find('button[name="add_product"]').hide();
+                modal.find('button[name="edit_product"]').show();
+                modal.find('#productId').val(button.data('id'));
+                modal.find('#productName').val(button.data('nama'));
+                modal.find('#productCategory').val(button.data('kategori'));
+                modal.find('#productPrice').val(button.data('harga'));
+                modal.find('#productStock').val(button.data('stock'));
+                modal.find('#productImageUrl').val(button.data('image_url'));
+                modal.find('#productDescription').val(button.data('description'));
+            } else {
+                // Add new product
+                modal.find('#productModalLabel').text('Add New Product');
+                modal.find('button[name="add_product"]').show();
+                modal.find('button[name="edit_product"]').hide();
+                modal.find('form')[0].reset();
+            }
+        });
+    </script>
 </body>
 
 </html>

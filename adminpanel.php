@@ -27,8 +27,6 @@ $total_users = getTotalUsers($pdo);
 echo "Welcome to the admin panel, " . $_SESSION['username'] . "!";
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -43,8 +41,7 @@ echo "Welcome to the admin panel, " . $_SESSION['username'] . "!";
     <link href="img/favicon.ico" rel="icon">
 
     <!-- Google Web Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Rubik&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Rubik&display=swap" rel="stylesheet">
 
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/all.min.css" rel="stylesheet">
@@ -58,6 +55,9 @@ echo "Welcome to the admin panel, " . $_SESSION['username'] . "!";
 
     <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+
+    <!-- AOS Stylesheet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
 
     <!-- Custom CSS for Layout Fix -->
     <style>
@@ -129,31 +129,25 @@ echo "Welcome to the admin panel, " . $_SESSION['username'] . "!";
         <!-- Content Wrapper Start -->
         <div class="content-wrapper">
             <!-- Sidebar Start -->
-            <div class="sidebar">
+            <div class="sidebar" data-aos="fade-right">
                 <h4 class="text-light">Admin Menu</h4>
                 <div class="list-group list-group-flush">
-                    <a href="adminpanel.php"
-                        class="list-group-item list-group-item-action bg-dark text-light">Dashboard</a>
-                    <a href="manageproduct.php" class="list-group-item list-group-item-action bg-dark text-light">Manage
-                        Products</a>
-                    <a href="manageorder.php" class="list-group-item list-group-item-action bg-dark text-light">Manage
-                        Orders</a>
-                    <a href="manageuser.php" class="list-group-item list-group-item-action bg-dark text-light">Manage
-                        Users</a>
-                    <a href="managecategory.php"
-                        class="list-group-item list-group-item-action bg-dark text-light">Manage
-                        Category</a>
+                    <a href="adminpanel.php" class="list-group-item list-group-item-action bg-dark text-light">Dashboard</a>
+                    <a href="manageproduct.php" class="list-group-item list-group-item-action bg-dark text-light">Manage Products</a>
+                    <a href="manageorder.php" class="list-group-item list-group-item-action bg-dark text-light">Manage Orders</a>
+                    <a href="manageuser.php" class="list-group-item list-group-item-action bg-dark text-light">Manage Users</a>
+                    <a href="managecategory.php" class="list-group-item list-group-item-action bg-dark text-light">Manage Category</a>
                 </div>
             </div>
             <!-- Sidebar End -->
 
             <!-- Main Content Start -->
             <div class="main-content">
-                <h2>Dashboard</h2>
-                <p>Selamat datang di Admin Panel AlatCampingKu.</p>
+                <h2 data-aos="fade-down">Dashboard</h2>
+                <p data-aos="fade-up">Selamat datang di Admin Panel AlatCampingKu.</p>
 
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-4" data-aos="fade-up">
                         <div class="card text-white bg-primary mb-3">
                             <div class="card-body">
                                 <h5 class="card-title">Total Products</h5>
@@ -161,7 +155,7 @@ echo "Welcome to the admin panel, " . $_SESSION['username'] . "!";
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4" data-aos="fade-up">
                         <div class="card text-white bg-secondary mb-3">
                             <div class="card-body">
                                 <h5 class="card-title">Total Orders</h5>
@@ -169,7 +163,7 @@ echo "Welcome to the admin panel, " . $_SESSION['username'] . "!";
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4" data-aos="fade-up">
                         <div class="card text-white bg-success mb-3">
                             <div class="card-body">
                                 <h5 class="card-title">Total Users</h5>
@@ -179,8 +173,8 @@ echo "Welcome to the admin panel, " . $_SESSION['username'] . "!";
                     </div>
                 </div>
 
-                <h3>Recent Orders</h3>
-                <table class="table table-bordered table-striped">
+                <h3 data-aos="fade-down">Recent Orders</h3>
+                <table class="table table-bordered table-striped" data-aos="fade-up">
                     <thead>
                         <tr>
                             <th>Order ID</th>
@@ -232,6 +226,14 @@ echo "Welcome to the admin panel, " . $_SESSION['username'] . "!";
     <script src="lib/tempusdominus/js/moment.min.js"></script>
     <script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
     <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
+
+    <!-- AOS JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+    <!-- Initialize AOS -->
+    <script>
+        AOS.init();
+    </script>
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
