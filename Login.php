@@ -2,6 +2,9 @@
 require 'koneksi.php';
 session_start();
 
+$error_username = ""; // Variabel untuk menyimpan pesan error username
+$error_password = ""; // Variabel untuk menyimpan pesan error password
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Ambil dan validasi input username dan password
     $username = trim($_POST['username']);
@@ -9,44 +12,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Pastikan username dan password tidak kosong
     if (empty($username) || empty($password)) {
-        echo "<script>alert('Username dan password tidak boleh kosong.'); window.location.href='login.php';</script>";
-        exit();
-    }
-
-    try {
-        // Query untuk mendapatkan user berdasarkan username
-        $stmt = $pdo->prepare("SELECT * FROM tb_users WHERE username = :username");
-        $stmt->bindParam(':username', $username);
-        $stmt->execute();
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($user) {
-            // Verifikasi password
-            if (password_verify($password, $user['password'])) {
-                // Menyimpan user_id ke dalam session setelah login berhasil
-                $_SESSION['id'] = $user['id'];
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['role'] = $user['role'];
-
-                // Redirection berdasarkan role
-                if ($user['role'] == 'admin') {
-                    header("Location: adminpanel.php");
-                } else {
-                    header("Location: indexx.php");
-                }
-                exit();
-            } else {
-                echo "<script>alert('Password salah! Silakan coba lagi.'); window.location.href='login.php';</script>";
-                exit();
-            }
-        } else {
-            echo "<script>alert('User tidak ditemukan! Silakan coba lagi.'); window.location.href='login.php';</script>";
-            exit();
+        if (empty($username)) {
+            $error_username = "Username tidak boleh kosong.";
         }
-    } catch (PDOException $e) {
-        // Jika terjadi kesalahan pada query SQL
-        echo "<script>alert('Terjadi kesalahan pada sistem. Silakan coba lagi nanti.'); window.location.href='login.php';</script>";
-        exit();
+        if (empty($password)) {
+            $error_password = "Password tidak boleh kosong.";
+        }
+    } else {
+        try {
+            // Query untuk mendapatkan user berdasarkan username
+            $stmt = $pdo->prepare("SELECT * FROM tb_users WHERE username = :username");
+            $stmt->bindParam(':username', $username);
+            $stmt->execute();
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($user) {
+                // Verifikasi password
+                if (password_verify($password, $user['password'])) {
+                    // Menyimpan user_id ke dalam session setelah login berhasil
+                    $_SESSION['id'] = $user['id'];
+                    $_SESSION['username'] = $user['username'];
+                    $_SESSION['role'] = $user['role'];
+
+                    // Redirection berdasarkan role
+                    if ($user['role'] == 'admin') {
+                        header("Location: adminpanel.php");
+                    } else {
+                        header("Location: indexx.php");
+                    }
+                    exit();
+                } else {
+                    $error_password = "Password salah! Silakan coba lagi.";
+                }
+            } else {
+                $error_username = "Username tidak ditemukan! Silakan coba lagi.";
+            }
+        } catch (PDOException $e) {
+            // Jika terjadi kesalahan pada query SQL
+            $error_username = "Terjadi kesalahan pada sistem. Silakan coba lagi nanti.";
+        }
     }
 }
 ?>
@@ -94,6 +98,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             opacity: 1;
             transform: translateY(0);
         }
+
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 
@@ -133,10 +142,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <div class="form-group">
                                 <label for="username">Username:</label>
                                 <input type="text" id="username" name="username" class="form-control" required>
+                                <!-- Pesan error untuk username -->
+                                <?php if (!empty($error_username)): ?>
+                                    <div class="error"><?php echo $error_username; ?></div>
+                                <?php endif; ?>
                             </div>
                             <div class="form-group">
                                 <label for="password">Password:</label>
                                 <input type="password" id="password" name="password" class="form-control" required>
+                                <!-- Pesan error untuk password -->
+                                <?php if (!empty($error_password)): ?>
+                                    <div class="error"><?php echo $error_password; ?></div>
+                                <?php endif; ?>
                             </div>
                             <div class="text-center">
                                 <input type="submit" value="Login" class="btn btn-primary btn-block">
@@ -170,7 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('body').addClass('visible');
         });
     </script>

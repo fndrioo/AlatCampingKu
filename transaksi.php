@@ -33,7 +33,15 @@ foreach ($cart_items as $item) {
 
 // Ambil token pembayaran dari session jika ada
 $snapToken = isset($_SESSION['snapToken']) ? $_SESSION['snapToken'] : '';
+
+if (!empty($_SESSION['snapToken'])) {
+    $snapToken = $_SESSION['snapToken'];
+} else {
+    echo "Gagal mendapatkan Snap Token. Pastikan koneksi ke Midtrans tersedia.";
+}
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -59,34 +67,60 @@ $snapToken = isset($_SESSION['snapToken']) ? $_SESSION['snapToken'] : '';
 
     <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
-    <script src="https://cdn.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-7983Gt8MB7gdojyE"></script>
+
+    <!-- AOS CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
     <!-- Tambahkan CSS Animasi -->
     <style>
-        /* Tambahkan animasi fade-in */
-        .animate-fade-in {
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeIn 1s forwards ease-in-out;
+        /* Layout flexbox untuk produk */
+        .product-item {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
         }
 
-        /* Atur keyframes untuk animasi fade-in */
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Gambar Produk */
+        .product-image img {
+            max-width: 100%;
+            height: auto;
         }
 
-        .detail-pesanan {
-            max-width: 900px;
-            margin: 0 auto;
-            text-align: left;
+        /* Mengatur ukuran container gambar */
+        .product-image {
+            max-width: 150px;
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Detail produk */
+        .product-details {
+            flex-grow: 1;
+        }
+
+        .product-details h5 {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .product-details p {
+            margin-bottom: 5px;
+        }
+
+        /* Ringkasan produk */
+        .product-summary {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
         }
     </style>
 </head>
 
-<body class="animate-fade-in">
+<body>
     <!-- Navbar Start -->
     <div class="container-fluid position-relative nav-bar p-0">
         <div class="position-relative px-lg-5" style="z-index: 9;">
@@ -104,19 +138,8 @@ $snapToken = isset($_SESSION['snapToken']) ? $_SESSION['snapToken'] : '';
                             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Kategori Peralatan</a>
                             <div class="dropdown-menu rounded-0 m-0">
                                 <?php foreach ($categories as $category): ?>
-                                    <?php if ($category['name'] == 'Tenda'): ?>
-                                        <a href="tenda.php?category_id=<?= $category['id_category'] ?>"
-                                            class="dropdown-item">Tenda</a>
-                                    <?php elseif ($category['name'] == 'Backpack'): ?>
-                                        <a href="Backpack.php?category_id=<?= $category['id_category'] ?>"
-                                            class="dropdown-item">Backpack</a>
-                                    <?php elseif ($category['name'] == 'Peralatan Masak'): ?>
-                                        <a href="PeralatanMasak.php?category_id=<?= $category['id_category'] ?>"
-                                            class="dropdown-item">Peralatan Masak</a>
-                                    <?php else: ?>
-                                        <a href="product.php?category_id=<?= $category['id_category'] ?>"
-                                            class="dropdown-item"><?= htmlspecialchars($category['name']) ?></a>
-                                    <?php endif; ?>
+                                    <a href="product.php?category_id=<?= $category['id_category'] ?>"
+                                        class="dropdown-item"><?= htmlspecialchars($category['name']) ?></a>
                                 <?php endforeach; ?>
                             </div>
                         </div>
@@ -126,7 +149,7 @@ $snapToken = isset($_SESSION['snapToken']) ? $_SESSION['snapToken'] : '';
                         <?php endif; ?>
                         <a href="keranjang.php" class="nav-item nav-link">Keranjang</a>
                         <a href="profile.php" class="nav-item nav-link">Profil</a>
-                        <a href="index.html" class="nav-item nav-link">Logout</a>
+                        <a href="logout.php" class="nav-item nav-link">Logout</a>
                     </div>
                 </div>
             </nav>
@@ -135,23 +158,27 @@ $snapToken = isset($_SESSION['snapToken']) ? $_SESSION['snapToken'] : '';
     <!-- Navbar End -->
 
     <!-- Transaction Start -->
-    <div class="container mt-5">
+    <div class="container mt-5" data-aos="fade-up">
         <h2 class="text-center mb-4">Transaksi Anda</h2>
         <div class="row">
-            <div class="col-lg-8">
+            <div class="col-lg-8" data-aos="fade-up" data-aos-delay="200">
                 <h4 class="mb-3">Detail Pesanan</h4>
                 <div class="detail-pesanan">
                     <?php if (count($cart_items) > 0): ?>
                         <?php foreach ($cart_items as $item): ?>
-                            <div class="card p-4 mb-4">
-                                <h5 class="mb-3"><?= htmlspecialchars($item['nama']) ?></h5>
-                                <img src="<?= htmlspecialchars($item['image_url']) ?>"
-                                    alt="<?= htmlspecialchars($item['nama']) ?>" class="img-fluid mb-3"
-                                    style="max-width: 200px;">
-                                <p>Harga Sewa: <strong>Rp. <?= number_format($item['harga'], 0, ',', '.') ?>/Hari</strong></p>
-                                <p>Jumlah Item: <strong><?= $item['quantity'] ?></strong></p>
-                                <p>Subtotal: <strong>Rp.
-                                        <?= number_format($item['harga'] * $item['quantity'], 0, ',', '.') ?></strong></p>
+                            <div class="product-item" data-aos="fade-up" data-aos-delay="100">
+                                <!-- Gambar Produk -->
+                                <div class="product-image">
+                                    <img src="<?= htmlspecialchars($item['image_url']) ?>"
+                                        alt="<?= htmlspecialchars($item['nama']) ?>" class="img-fluid">
+                                </div>
+
+                                <!-- Detail Produk -->
+                                <div class="product-details">
+                                    <h5><?= htmlspecialchars($item['nama']) ?></h5>
+                                    <p>Harga Sewa: Rp. <?= number_format($item['harga'], 0, ',', '.') ?>/Hari</p>
+                                    <p>Jumlah Item: <?= $item['quantity'] ?></p>
+                                </div>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -159,12 +186,12 @@ $snapToken = isset($_SESSION['snapToken']) ? $_SESSION['snapToken'] : '';
                     <?php endif; ?>
                 </div>
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paymentModal"
-                    onclick="scrollToTop()">
+                    data-aos="zoom-in" data-aos-delay="300">
                     Checkout
                 </button>
             </div>
 
-            <div class="col-lg-4">
+            <div class="col-lg-4" data-aos="fade-left" data-aos-delay="400">
                 <h4 class="mb-3">Ringkasan Pesanan</h4>
                 <div class="card p-4 mb-4">
                     <p>Total Pembayaran: <strong>Rp. <?= number_format($total_belanja, 0, ',', '.') ?></strong></p>
@@ -177,7 +204,7 @@ $snapToken = isset($_SESSION['snapToken']) ? $_SESSION['snapToken'] : '';
 
     <!-- Modal Pembayaran -->
     <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog" data-aos="zoom-in">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="paymentModalLabel">Data Pembayaran</h5>
@@ -203,17 +230,14 @@ $snapToken = isset($_SESSION['snapToken']) ? $_SESSION['snapToken'] : '';
                             <label for="cvv">CVV</label>
                             <input type="text" class="form-control" id="cvv" name="cvv" required>
                         </div>
-                        <input type="hidden" name="total_payment" value="<?= $total_belanja ?>">
+                        <input type="hidden" name="total_price" value="<?= $total_belanja ?>">
+                        <button type="submit" class="btn btn-success">Proses Pembayaran</button>
                     </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-                    <button type="submit" form="paymentForm" class="btn btn-primary">Bayar</button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Modal Pembayaran End -->
+
 
     <!-- Footer Start -->
     <div class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">
@@ -238,42 +262,56 @@ $snapToken = isset($_SESSION['snapToken']) ? $_SESSION['snapToken'] : '';
         </div>
     </div>
     <!-- Footer End -->
+    <?php if ($snapToken): ?>
+        <!-- Pastikan sudah ada jQuery dan Snap.js -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://app.sandbox.midtrans.com/snap/snap.js"
+            data-client-key="SB-Mid-client-YourClientKeyHere"></script>
 
-    <!-- Back to Top -->
-    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="fa fa-angle-double-up"></i></a>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                const snapToken = "<?php echo $_SESSION['snapToken']; ?>";
 
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://cdn.midtrans.com/snap/snap.js" data-client-key="YOUR_CLIENT_KEY"></script>
-    <script>
-            $(document).ready(function() {
-                var snapToken = '<?= $snapToken ?>';
+                // Fungsi untuk menampilkan modal Snap Midtrans
+                function showSnapModal() {
+                    window.snap.pay(snapToken, {
+                        onSuccess: function (result) {
+                            console.log("Payment success:", result);
+                            window.location.href = 'success.php';
+                        },
+                        onPending: function (result) {
+                            console.log("Payment pending:", result);
+                            alert("Pembayaran Anda masih pending.");
+                        },
+                        onError: function (result) {
+                            console.log("Payment failed:", result);
+                            alert("Pembayaran gagal.");
+                        },
+                        onClose: function () {
+                            alert("Anda menutup modal pembayaran.");
+                        }
+                    });
+                }
 
-                $('#pay-button').on('click', function() {
-                    if (snapToken) {
-                        snap.pay(snapToken, {
-                            onSuccess: function(result) {
-                                alert("Pembayaran berhasil!");
-                                console.log(result);
-                            },
-                            onPending: function(result) {
-                                alert("Menunggu pembayaran!");
-                                console.log(result);
-                            },
-                            onError: function(result) {
-                                alert("Pembayaran gagal!");
-                                console.log(result);
-                            },
-                            onClose: function() {
-                                alert('Anda menutup pop-up tanpa menyelesaikan pembayaran');
-                            }
-                        });
-                    } else {
-                        alert("Token pembayaran tidak ditemukan.");
-                    }
-                });
+                // Panggil modal secara otomatis saat halaman dimuat
+                showSnapModal();
             });
         </script>
+
+    <?php endif; ?>
+    <!-- AOS JS -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 1000, // Durasi animasi
+            once: true, // Animasi hanya terjadi satu kali
+        });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="SB-Mid-client-7983Gt8MB7gdojyE"></script>
+
 </body>
 
 </html>

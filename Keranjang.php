@@ -72,11 +72,27 @@ foreach ($cart_items as $item) {
     <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
 
+    <!-- Custom Stylesheet -->
     <style>
-        /* Membuat tabel lebih lebar */
-        .table-custom-width {
-            width: 100%;
-            max-width: 1200px;
+        /* Setup flexbox untuk keseluruhan halaman */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            /* Membuat konten mengambil seluruh ruang yang tersisa */
+        }
+
+        .footer {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
         }
 
         /* Membuat gambar lebih kecil di dalam tabel */
@@ -94,31 +110,34 @@ foreach ($cart_items as $item) {
         .fade-in.visible {
             opacity: 1;
             transform: translateY(0);
+        }
 
-            html,
-            body {
-                height: 100%;
-                /* Membuat tinggi HTML dan body 100% */
-            }
+        /* Kode CSS untuk Popup */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            background-color: #28a745;
+            /* Warna hijau untuk berhasil */
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            opacity: 0;
+            transform: translate(-50%, -50%) translateY(-20px);
+            z-index: 1000;
+            text-align: center;
+            /* Center text */
+        }
 
-            .container {
-                min-height: calc(100vh - 200px);
-                /* Sesuaikan tinggi agar footer tetap di bawah */
-            }
-
-            footer {
-                position: relative;
-                /* Atur posisi footer */
-                bottom: 0;
-                width: 100%;
-            }
-
+        .popup.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) translateY(0);
         }
     </style>
 </head>
 
 <body>
-
     <!-- Navbar Start -->
     <div class="container-fluid position-relative nav-bar p-0">
         <div class="position-relative px-lg-5" style="z-index: 9;">
@@ -136,25 +155,14 @@ foreach ($cart_items as $item) {
                             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Kategori Peralatan</a>
                             <div class="dropdown-menu rounded-0 m-0">
                                 <?php foreach ($categories as $category): ?>
-                                    <?php if ($category['name'] == 'Tenda'): ?>
-                                        <a href="tenda.php?category_id=<?= $category['id_category'] ?>"
-                                            class="dropdown-item">Tenda</a>
-                                    <?php elseif ($category['name'] == 'Backpack'): ?>
-                                        <a href="Backpack.php?category_id=<?= $category['id_category'] ?>"
-                                            class="dropdown-item">Backpack</a>
-                                    <?php elseif ($category['name'] == 'Peralatan Masak'): ?>
-                                        <a href="PeralatanMasak.php?category_id=<?= $category['id_category'] ?>"
-                                            class="dropdown-item">Peralatan Masak</a>
-                                    <?php else: ?>
-                                        <a href="product.php?category_id=<?= $category['id_category'] ?>"
-                                            class="dropdown-item"><?= htmlspecialchars($category['name']) ?></a>
-                                    <?php endif; ?>
+                                    <a href="product.php?category_id=<?= $category['id_category'] ?>" class="dropdown-item">
+                                        <?= htmlspecialchars($category['name']) ?>
+                                    </a>
                                 <?php endforeach; ?>
                             </div>
                         </div>
                         <a href="orders.php" class="nav-item nav-link">Pesanan</a>
-                        <?php
-                        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                             <a href="adminpanel.php" class="nav-item nav-link">Admin Panel</a>
                         <?php endif; ?>
                         <a href="keranjang.php" class="nav-item nav-link active">Keranjang</a>
@@ -165,111 +173,132 @@ foreach ($cart_items as $item) {
             </nav>
         </div>
     </div>
-
     <!-- Navbar End -->
 
     <!-- Keranjang Start -->
-    <div class="container fade-in">
-        <?php if (isset($_GET['message'])): ?>
-            <div class="alert alert-success text-center">
-                <?= htmlspecialchars($_GET['message']) ?>
+    <div class="content-wrapper">
+        <div class="container fade-in">
+            <div id="popup" class="popup" style="display: none;">
+                <p>Keranjang berhasil diperbarui!</p>
             </div>
-        <?php endif; ?>
-        <h2 class="text-center mb-4">Keranjang Belanja</h2>
-        <?php if (empty($cart_items)): ?>
-            <p class='text-center'>Keranjang Anda kosong!</p>
-        <?php else: ?>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Produk</th>
-                        <th>Nama</th>
-                        <th>Harga</th>
-                        <th>Jumlah</th>
-                        <th>Total</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($cart_items as $item): ?>
-                        <?php $item_total = $item['harga'] * $item['quantity']; ?>
+            <?php if (isset($_GET['message'])): ?>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const popup = document.getElementById('popup');
+                        popup.style.display = 'block';
+                        popup.classList.add('visible');
+                        setTimeout(() => {
+                            popup.classList.remove('visible');
+                            setTimeout(() => {
+                                popup.style.display = 'none';
+                            }, 500); // Waktu animasi hilang
+                        }, 3000); // Durasi tampil popup
+                    });
+                </script>
+            <?php endif; ?>
+            <h2 class="text-center mb-4 mt-3">Keranjang Belanja</h2>
+            <?php if (empty($cart_items)): ?>
+                <p class='text-center'>Keranjang Anda kosong!</p>
+            <?php else: ?>
+                <table class="table table-striped">
+                    <thead>
                         <tr>
-                            <td><img src="<?= htmlspecialchars($item['image_url']) ?>" alt="Product" class="product-image"></td>
-                            <td><?= htmlspecialchars($item['nama']) ?></td>
-                            <td>Rp. <?= number_format($item['harga'], 0, ',', '.') ?></td>
-                            <td><?= $item['quantity'] ?></td>
-                            <td>Rp. <?= number_format($item_total, 0, ',', '.') ?></td>
-                            <td><a href="hapus_keranjang.php?id=<?= $item['product_id'] ?>" class="btn btn-danger">Hapus</a>
-                            </td>
+                            <th>Produk</th>
+                            <th>Nama</th>
+                            <th>Harga</th>
+                            <th>Jumlah</th>
+                            <th>Total</th>
+                            <th>Aksi</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-            <h4>Total: Rp. <?= number_format($total_belanja, 0, ',', '.') ?></h4>
-            <a href="indexx.php" class="btn btn-secondary">Lanjut Belanja</a>
-            <a href="transaksi.php" class="btn btn-primary">Checkout</a>
-        <?php endif; ?>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($cart_items as $item): ?>
+                            <?php $item_total = $item['harga'] * $item['quantity']; ?>
+                            <tr>
+                                <td><img src="<?= htmlspecialchars($item['image_url']) ?>" alt="Product" class="product-image">
+                                </td>
+                                <td><?= htmlspecialchars($item['nama']) ?></td>
+                                <td>Rp. <?= number_format($item['harga'], 0, ',', '.') ?></td>
+                                <td>
+                                    <!-- Tombol kurangi dan tambahkan kuantitas -->
+                                    <form action="update_keranjang.php" method="post" class="d-inline">
+                                        <input type="hidden" name="product_id" value="<?= $item['product_id'] ?>">
+                                        <button type="submit" name="action" value="kurangi"
+                                            class="btn btn-sm btn-danger">-</button>
+                                    </form>
+                                    <span><?= $item['quantity'] ?></span>
+                                    <form action="update_keranjang.php" method="post" class="d-inline">
+                                        <input type="hidden" name="product_id" value="<?= $item['product_id'] ?>">
+                                        <button type="submit" name="action" value="tambah"
+                                            class="btn btn-sm btn-success">+</button>
+                                    </form>
+                                </td>
+                                <td>Rp. <?= number_format($item_total, 0, ',', '.') ?></td>
+                                <td>
+                                    <!-- Tombol hapus produk dari keranjang -->
+                                    <form action="hapus_dari_keranjang.php" method="post" class="d-inline">
+                                        <input type="hidden" name="product_id" value="<?= $item['product_id'] ?>">
+                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <div class="text-left">
+                    <h4>Total Belanja: Rp. <?= number_format($total_belanja, 0, ',', '.') ?></h4>
+                    <a href="transaksi.php" class="btn btn-primary">Checkout</a>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
     <!-- Keranjang End -->
 
+
     <!-- Footer Start -->
-    <!-- Footer Start -->
-    <footer class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">
+    <div class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">
         <div class="row pt-5">
             <div class="col-lg-3 col-md-6 mb-5">
-                <h4 class="text-uppercase text-primary mb-4">Hubungi Kami</h4>
-                <p><i class="fa fa-map-marker-alt mr-2"></i>123 Street, City, Indonesia</p>
-                <p><i class="fa fa-phone-alt mr-2"></i>+012 345 67890</p>
-                <p><i class="fa fa-envelope mr-2"></i>info@example.com</p>
+                <h4 class="text-uppercase text-primary mb-4">AlatCampingKu</h4>
+                <p class="mb-2"><i class="fa fa-map-marker-alt mr-3"></i>Alamat Anda</p>
+                <p class="mb-2"><i class="fa fa-phone-alt mr-3"></i>+62 123 456 789</p>
+                <p><i class="fa fa-envelope mr-3"></i>info@alatcampingku.com</p>
             </div>
             <div class="col-lg-3 col-md-6 mb-5">
-                <h4 class="text-uppercase text-primary mb-4">Follow Us</h4>
-                <p>Follow us on our social media accounts</p>
-                <div class="d-flex">
-                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-twitter"></i></a>
-                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-youtube"></i></a>
-                    <a class="btn btn-outline-light btn-social mr-2" href="#"><i class="fab fa-instagram"></i></a>
-                    <a class="btn btn-outline-light btn-social" href="#"><i class="fab fa-linkedin-in"></i></a>
-                </div>
+                <h4 class="text-uppercase text-primary mb-4">Ikuti Kami</h4>
+                <p class="mb-2"><i class="fab fa-facebook-f mr-3"></i>Facebook</p>
+                <p class="mb-2"><i class="fab fa-twitter mr-3"></i>Twitter</p>
+                <p class="mb-2"><i class="fab fa-linkedin-in mr-3"></i>LinkedIn</p>
+                <p><i class="fab fa-instagram mr-3"></i>Instagram</p>
             </div>
         </div>
-    </footer>
-    <!-- Footer End -->
-
+    </div>
     <!-- Footer End -->
 
     <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="fa fa-chevron-up"></i></a>
 
     <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="lib/jquery/jquery.min.js"></script>
     <script src="lib/owlcarousel/owl.carousel.min.js"></script>
     <script src="lib/tempusdominus/js/moment.min.js"></script>
-    <script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
     <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
 
-    <!-- Customized Bootstrap Scripts -->
+    <!-- Customized Bootstrap Javascript -->
     <script src="js/bootstrap.bundle.min.js"></script>
 
-    <!-- Template Scripts -->
+    <!-- Template Javascript -->
     <script src="js/main.js"></script>
 
-    <!-- Selfmade Scripts -->
     <script>
+        // Animasi fade-in
         document.addEventListener("DOMContentLoaded", function () {
-            const container = document.querySelector('.container');
-            container.classList.add('fade-in', 'visible');
+            const elements = document.querySelectorAll('.fade-in');
+            elements.forEach((el) => {
+                el.classList.add('visible');
+            });
         });
     </script>
-
-    <!--css-->
-    <style>
-        .container-margin-top {
-            margin-top: 90px;
-            /* Sesuaikan dengan margin-bottom footer jika diperlukan */
-        }
-    </style>
 </body>
 
 </html>

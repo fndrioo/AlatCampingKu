@@ -24,7 +24,6 @@ $total_users = $user_data['total_users'];
 // Mengambil total pengguna melalui fungsi
 $total_users = getTotalUsers($pdo);
 
-echo "Welcome to the admin panel, " . $_SESSION['username'] . "!";
 ?>
 
 <!DOCTYPE html>
