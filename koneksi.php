@@ -2,7 +2,7 @@
 // File koneksi.php
 
 $host = 'localhost';
-$dbname = 'db_alatacampingku';
+$dbname = 'db_alatcampingkuu';
 $username = 'root';
 $password = '';
 

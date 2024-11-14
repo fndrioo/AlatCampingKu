@@ -89,6 +89,54 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
                 transform: translateY(0);
             }
         }
+
+        .card-transaksi {
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background-color: #fff;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-transaksi:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-transaksi .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .card-transaksi .card-text {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .card-transaksi .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: #f77d0a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .btn-sekarang {
+            width: 100%;
+            padding: 12px;
+            background-color: #f77d0a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 
@@ -136,7 +184,7 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
     <!-- Navbar End -->
-                                        
+
     <!-- Carousel Start -->
     <div class="container-fluid p-0" style="margin-bottom: 0;">
         <div id="header-carousel" class="carousel slide" data-ride="carousel">
@@ -149,7 +197,7 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
                             <h1 class="display-1 text-white mb-md-4">Kita Menyediakan Peralatan Outdoor Yang
                                 Berkualitas.</h1>
                             <a href="#produkUnggulan" id="scrollToProdukUnggulan"
-                                class="btn btn-primary py-md-3 px-md-5 mt-2">Order Sekarang!</a>
+                                class="btn-sekarang btn-primary py-md-3 px-md-5 mt-2">Order Sekarang!</a>
                         </div>
                     </div>
                 </div>
@@ -161,7 +209,7 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
                             <h1 class="display-1 text-white mb-md-4">Kita Menyediakan Peralatan Outdoor Yang
                                 Berkualitas.</h1>
                             <a href="#produkUnggulan" id="scrollToProdukUnggulan"
-                                class="btn btn-primary py-md-3 px-md-5 mt-2">Order Sekarang!</a>
+                                class="btn-sekarang btn-primary py-md-3 px-md-5 mt-2">Order Sekarang!</a>
                         </div>
                     </div>
                 </div>
@@ -188,14 +236,15 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
             $featured_products = array_slice($products, 0, 3);
             foreach ($featured_products as $product): ?>
                 <div class="col-md-4 mb-3">
-                    <div class="card animate__fadeInUp">
+                    <!-- Menggunakan class card dari halaman transaksi -->
+                    <div class="card card-transaksi shadow-sm">
                         <img class="card-img-top" src="<?= htmlspecialchars($product['image_url']) ?>"
                             alt="<?= htmlspecialchars($product['nama']) ?>">
                         <div class="card-body">
                             <h5 class="card-title"><?= htmlspecialchars($product['nama']) ?></h5>
                             <p class="card-text">Rp. <?= number_format($product['harga'], 0, ',', '.') ?></p>
-                            <a href="detail.php?id=<?= htmlspecialchars($product['id']) ?>"
-                                class="btn btn-primary">Lihat Detail</a>
+                            <a href="detail.php?id=<?= htmlspecialchars($product['product_id']) ?>" class="btn btn-primary">Lihat
+                                Detail</a>
                         </div>
                     </div>
                 </div>
@@ -203,6 +252,7 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
     <!-- Produk Unggulan End -->
+
 
     <!-- Footer Start -->
     <div class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">

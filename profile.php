@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-?>  
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -130,6 +130,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .card.visible {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        .container-kredensial {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background: #F8F9FA;
+        }
+
+        .container-kredensial h3 {
+            font-weight: bold;
+            color: #4e73df;
+            /* Sesuaikan warna heading agar konsisten dengan tema */
+        }
+
+        .container-kredensial form {
+            margin-top: 20px;
+        }
+
+        .modal-header.bg-primary {
+            background-color: #4e73df !important;
+        }
+
+        .btn-pw {
+            width: 100%;
+            padding: 12px;
+            background-color: #ffc107;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-upd {
+            width: 100%;
+            padding: 12px;
+            background-color: #f77d0a;
+            ;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .text-center-main {
+            color: #2b2e4a;
         }
     </style>
 </head>
@@ -184,41 +231,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Navbar End -->
 
     <!-- Profile Section Start -->
-    <div class="container-fluid py-5 bg-light">
+    <div class="container-fluid-profile py-5">
         <div class="container wider-container">
             <div class="row justify-content-center">
                 <div class="col-lg-8">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-primary text-white text-center">
-                            <h3 class="m-0">Profil Saya</h3>
+                    <div class="container-kredensial shadow-sm p-4">
+                        <!-- Menambahkan kelas text-center pada h3 -->
+                        <h3 class="text-center text-primary mb-4 text-secondary">Pengaturan Profil</h3>
+                        <?php if (isset($success_msg)): ?>
+                            <div class="alert alert-success"><?php echo $success_msg; ?></div>
+                        <?php elseif (isset($error_msg)): ?>
+                            <div class="alert alert-danger"><?php echo $error_msg; ?></div>
+                        <?php endif; ?>
+
+                        <div class="text-center mb-4">
+                            <img src="img/profileimg.png" class="rounded-circle" alt="Profile Image" width="150"
+                                height="150">
                         </div>
-                        <div class="card-body">
-                            <?php if (isset($success_msg)): ?>
-                                <div class="alert alert-success"><?php echo $success_msg; ?></div>
-                            <?php elseif (isset($error_msg)): ?>
-                                <div class="alert alert-danger"><?php echo $error_msg; ?></div>
-                            <?php endif; ?>
-                            <div class="text-center mb-4">
-                                <img src="img/profileimg.png" class="rounded-circle" alt="Profile Image" width="200"
-                                    height="200">
+
+                        <!-- Form Update Profil -->
+                        <form method="post" action="" class="mb-4">
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" class="form-control" id="username" name="username"
+                                    value="<?php echo htmlspecialchars($user['username']); ?>" required>
                             </div>
-                            <form method="post" action="">
-                                <div class="form-group">
-                                    <label for="username">Username</label>
-                                    <input type="text" class="form-control" id="username" name="username"
-                                        value="<?php echo htmlspecialchars($user['username']); ?>" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="email">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email"
-                                        value="<?php echo htmlspecialchars($user['email']); ?>" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary btn-block" name="update_profile">Update
-                                    Profil</button>
-                            </form>
-                            <button type="button" class="btn btn-warning btn-block mt-3" data-toggle="modal"
-                                data-target="#changePasswordModal">Ganti Password</button>
-                        </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                            </div>
+                            <button type="submit" class="btn-upd btn-primary btn-block" name="update_profile">Update
+                                Profil</button>
+                        </form>
+
+                        <!-- Tombol Ganti Password -->
+                        <button type="button" class="btn-pw btn-warning btn-block" data-toggle="modal"
+                            data-target="#changePasswordModal">Ganti Password</button>
                     </div>
                 </div>
             </div>
@@ -229,9 +278,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Modal Change Password -->
     <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog"
         aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="changePasswordModalLabel">Ganti Password</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>

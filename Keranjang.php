@@ -14,7 +14,7 @@ $user_id = $_SESSION['id'];
 $sql = "SELECT tb_keranjang.quantity, tb_keranjang.product_id, tb_keranjang.created_at, 
         products.nama, products.harga, products.image_url 
         FROM tb_keranjang 
-        JOIN products ON tb_keranjang.product_id = products.id 
+        JOIN products ON tb_keranjang.product_id = products.product_id 
         WHERE tb_keranjang.user_id = :user_id";
 $stmt = $pdo->prepare($sql);
 $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
@@ -40,7 +40,23 @@ $total_belanja = 0;
 foreach ($cart_items as $item) {
     $total_belanja += $item['harga'] * $item['quantity'];
 }
-?>
+
+if (isset($_GET['message']) && $_GET['message'] === 'deleted'): ?>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'block';
+            popup.classList.add('visible');
+            setTimeout(() => {
+                popup.classList.remove('visible');
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                }, 500); // Waktu animasi hilang
+            }, 3000); // Durasi tampil popup
+        });
+    </script>
+<?php endif; ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -74,6 +90,71 @@ foreach ($cart_items as $item) {
 
     <!-- Custom Stylesheet -->
     <style>
+        /* Styling tabel keranjang */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .table thead {
+            background-color: #333;
+            color: white;
+        }
+
+        .table th,
+        .table td {
+            padding: 15px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #ddd;
+        }
+
+        /* Membuat border tabel lebih lembut */
+        .table th {
+            background-color: #343a40;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f9f9f9;
+        }
+
+        /* Styling untuk gambar produk agar lebih kecil */
+        .product-image {
+            width: 100px;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* Styling tombol-tombol */
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.9rem;
+        }
+
+        /* Styling tombol checkout */
+        .btn-primary {
+            background-color: #F77D0A;
+            color: white;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+
+        /* Styling total belanja */
+        .total-belanja {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #333;
+        }
+
         /* Setup flexbox untuk keseluruhan halaman */
         html,
         body {
@@ -236,7 +317,7 @@ foreach ($cart_items as $item) {
                                 <td>Rp. <?= number_format($item_total, 0, ',', '.') ?></td>
                                 <td>
                                     <!-- Tombol hapus produk dari keranjang -->
-                                    <form action="hapus_dari_keranjang.php" method="post" class="d-inline">
+                                    <form action="hapus_keranjang.php" method="post" class="d-inline">
                                         <input type="hidden" name="product_id" value="<?= $item['product_id'] ?>">
                                         <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
                                     </form>

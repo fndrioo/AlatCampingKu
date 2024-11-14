@@ -8,7 +8,7 @@ if (isset($_POST['product_id'], $_POST['quantity'])) {
     $user_id = $_SESSION['id']; // Ambil user_id dari session
 
     // Ambil informasi produk dari database
-    $stmt = $pdo->prepare("SELECT nama, harga, image_url FROM products WHERE id = :id");
+    $stmt = $pdo->prepare("SELECT nama, harga, image_url FROM products WHERE product_id = :id");
     $stmt->bindParam(':id', $product_id);
     $stmt->execute();
     $product = $stmt->fetch(PDO::FETCH_ASSOC);

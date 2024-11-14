@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['role'] = $role;
 
         // Redirect ke landing page
-        header("Location: indexx.php");
+        header("Location: login.php");
         exit;
     } else {
         echo "<script>alert('Registration failed! Please try again.'); window.location.href='register.php';</script>";

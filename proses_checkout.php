@@ -1,65 +1,84 @@
 <?php
 session_start();
 include 'koneksi.php';
-require 'vendor/autoload.php';
-require 'vendor/midtrans/midtrans-php/Midtrans.php';
 
-if (!isset($_SESSION['id'])) {
-    header('Location: login.php');
+// Ambil data JSON dari request body
+$json = file_get_contents('php://input');
+$data = json_decode($json, true);
+
+// Verifikasi tanda tangan Midtrans
+$serverKey = 'SB-Mid-server-sSwpNBSHANDCkGZ2JeiEblLZ';
+$calculatedSignature = hash('sha512', $data['order_id'] . $data['status_code'] . $data['gross_amount'] . $serverKey);
+
+if ($data['signature_key'] !== $calculatedSignature) {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'Invalid signature']);
     exit();
 }
 
-$user_id = $_SESSION['id'];
-$card_holder = $_POST['card_holder'] ?? '';
-$total_price = $_POST['total_price'];
+if ($data['transaction_status'] === 'settlement') {
+    $orderId = $data['order_id'];
+    $grossAmount = $data['gross_amount'];
+    $userId = $_SESSION['id'];
 
-try {
-    $pdo->beginTransaction();
+    // Ambil item dari keranjang
+    $sql = "SELECT product_id, quantity FROM tb_keranjang WHERE user_id = :user_id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    $cartItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $sqlCart = "SELECT * FROM tb_keranjang WHERE user_id = :user_id";
-    $stmtCart = $pdo->prepare($sqlCart);
-    $stmtCart->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-    $stmtCart->execute();
-    $cart_items = $stmtCart->fetchAll(PDO::FETCH_ASSOC);
-
-    foreach ($cart_items as $item) {
-        $stmt = $pdo->prepare("INSERT INTO tb_orders (user_id, product_id, quantity, total_price, order_date)
-            VALUES (:user_id, :product_id, :quantity, :total_price, NOW())");
-        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        $stmt->bindParam(':product_id', $item['product_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':quantity', $item['quantity'], PDO::PARAM_INT);
-        $stmt->bindParam(':total_price', $total_price, PDO::PARAM_STR);
-        $stmt->execute();
+    if (empty($cartItems)) {
+        echo json_encode(['status' => 'error', 'message' => 'No items in cart']);
+        exit();
     }
 
-    $pdo->prepare("DELETE FROM tb_keranjang WHERE user_id = :user_id")
-        ->execute([':user_id' => $user_id]);
+    try {
+        $insertOrder = "INSERT INTO tb_orders (user_id, total_price, order_date) VALUES (:user_id, :total_price, NOW())";
+        $stmtInsertOrder = $pdo->prepare($insertOrder);
+        $stmtInsertOrder->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmtInsertOrder->bindParam(':total_price', $grossAmount, PDO::PARAM_STR);
+        $stmtInsertOrder->execute();
 
-    \Midtrans\Config::$serverKey = 'SB-Mid-server-sSwpNBSHANDCkGZ2JeiEblLZ';
-    \Midtrans\Config::$isProduction = false;
+        $orderId = $pdo->lastInsertId();
 
-    $params = [
-        'transaction_details' => [
-            'order_id' => uniqid(),
-            'gross_amount' => $total_price,
-        ],
-        'customer_details' => [
-            'first_name' => $card_holder,
-            'email' => $_SESSION['email'],
-        ],
-        'credit_card' => [
-            'secure' => true,
-        ],
-    ];
+        foreach ($cartItems as $item) {
+            $productId = $item['product_id'];
+            $quantity = $item['quantity'];
 
-    $_SESSION['snapToken'] = \Midtrans\Snap::getSnapToken($params);
+            $sqlPrice = "SELECT harga FROM products WHERE id = :product_id";
+            $stmtPrice = $pdo->prepare($sqlPrice);
+            $stmtPrice->bindParam(':product_id', $productId, PDO::PARAM_INT);
+            $stmtPrice->execute();
+            $product = $stmtPrice->fetch(PDO::FETCH_ASSOC);
 
-    $pdo->commit();
-    header("Location: transaksi.php");
-    exit();
+            if ($product) {
+                $hargaPerItem = $product['harga'];
+                $totalPrice = $quantity * $hargaPerItem;
 
-} catch (Exception $e) {
-    $pdo->rollBack();
-    echo "Proses checkout gagal: " . $e->getMessage();
+                $insertOrderDetails = "INSERT INTO tb_order_details (order_id, product_id, quantity, price)
+                                       VALUES (:order_id, :product_id, :quantity, :price)";
+                $stmtInsertDetails = $pdo->prepare($insertOrderDetails);
+                $stmtInsertDetails->bindParam(':order_id', $orderId, PDO::PARAM_INT);
+                $stmtInsertDetails->bindParam(':product_id', $productId, PDO::PARAM_INT);
+                $stmtInsertDetails->bindParam(':quantity', $quantity, PDO::PARAM_INT);
+                $stmtInsertDetails->bindParam(':price', $totalPrice, PDO::PARAM_STR);
+                $stmtInsertDetails->execute();
+            }
+        }
+
+        $clearCart = "DELETE FROM tb_keranjang WHERE user_id = :user_id";
+        $stmtClear = $pdo->prepare($clearCart);
+        $stmtClear->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmtClear->execute();
+
+        http_response_code(200);
+        echo json_encode(['status' => 'success', 'message' => 'Order processed successfully']);
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+    }
+} else {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Transaction not settled']);
 }
 ?>

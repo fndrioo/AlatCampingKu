@@ -17,7 +17,7 @@ try {
 }
 
 $product_id = $_GET['id'];
-$query = $pdo->prepare("SELECT * FROM products WHERE id = :id");
+$query = $pdo->prepare("SELECT * FROM products WHERE product_id = :id");
 $query->execute(['id' => $product_id]);
 $product = $query->fetch(PDO::FETCH_ASSOC);
 
@@ -123,6 +123,47 @@ if (isset($_POST['add_to_cart'])) {
         .product-detail-info {
             flex-grow: 1;
         }
+
+        .product-detail-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 30px;
+        }
+
+        /* Gaya Gambar Produk */
+        .product-detail-image {
+            max-width: 40%;
+        }
+
+        .product-detail-image img {
+            max-width: 100%;
+            height: auto;
+            margin: auto;
+            border-radius: 8px;
+        }
+
+        /* Gaya Info Detail Produk */
+        .product-detail-info {
+            flex-grow: 1;
+        }
+
+        /* Tombol Tambahkan ke Keranjang */
+        .btn-cart {
+            max-width: 200px;
+            /* Atur lebar maksimum tombol */
+            width: 100%;
+            /* Sesuaikan dengan lebar kontainer */
+            padding: 10px;
+            /* Atur padding untuk kenyamanan */
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            /* Pusatkan teks pada tombol */
+        }
     </style>
 </head>
 
@@ -207,7 +248,7 @@ if (isset($_POST['add_to_cart'])) {
 
                         <!-- Form untuk menambah ke keranjang -->
                         <form action="add_to_cart.php" method="POST" class="d-flex align-items-center">
-                            <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+                            <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
 
                             <!-- Input untuk kuantitas -->
                             <div class="input-group" style="max-width: 200px; flex-grow: 1; margin-right: 10px;">
@@ -224,7 +265,7 @@ if (isset($_POST['add_to_cart'])) {
                             </div>
 
                             <!-- Tombol Tambah ke Keranjang -->
-                            <button type="submit" name="add_to_cart" class="btn btn-success">
+                            <button type="submit" name="add_to_cart" class="btn-cart btn-success">
                                 Tambahkan ke Keranjang
                             </button>
                         </form>

@@ -1,20 +1,18 @@
 <?php
 session_start();
-include 'koneksi.php'; // Pastikan koneksi database sudah ada
+include 'koneksi.php';
 
-// Pastikan pengguna sudah login
-if (!isset($_SESSION['id'])) {
-    header('Location: login.php');
+if (!isset($_POST['product_id']) || !isset($_POST['action']) || !isset($_SESSION['id'])) {
+    header('Location: keranjang.php?error=invalid_request');
     exit();
 }
 
+$product_id = $_POST['product_id'];
+$action = $_POST['action'];
 $user_id = $_SESSION['id'];
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'], $_POST['action'])) {
-    $product_id = $_POST['product_id'];
-    $action = $_POST['action'];
-
-    // Query untuk mendapatkan kuantitas saat ini
+try {
+    // Dapatkan kuantitas saat ini
     $sql = "SELECT quantity FROM tb_keranjang WHERE user_id = :user_id AND product_id = :product_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
@@ -24,31 +22,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'], $_POST['
 
     if ($item) {
         $quantity = $item['quantity'];
-
-        // Kurangi atau tambahkan kuantitas
         if ($action == 'tambah') {
             $quantity++;
         } elseif ($action == 'kurangi' && $quantity > 1) {
             $quantity--;
-        }
-
-        // Update kuantitas di database
-        $sql_update = "UPDATE tb_keranjang SET quantity = :quantity WHERE user_id = :user_id AND product_id = :product_id";
-        $stmt_update = $pdo->prepare($sql_update);
-        $stmt_update->bindParam(':quantity', $quantity, PDO::PARAM_INT);
-        $stmt_update->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        $stmt_update->bindParam(':product_id', $product_id, PDO::PARAM_INT);
-
-        if ($stmt_update->execute()) {
-            header('Location: keranjang.php?message=Keranjang berhasil diperbarui'); // Redirect kembali ke halaman keranjang
-            exit();
         } else {
-            echo "Error updating quantity.";
+            // Jika kuantitas menjadi nol atau kurang, hapus item
+            $sql = "DELETE FROM tb_keranjang WHERE user_id = :user_id AND product_id = :product_id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->bindParam(':product_id', $product_id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            header('Location: keranjang.php?message=deleted');
+            exit();
         }
+
+        // Perbarui kuantitas
+        $sql = "UPDATE tb_keranjang SET quantity = :quantity WHERE user_id = :user_id AND product_id = :product_id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':quantity', $quantity, PDO::PARAM_INT);
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->bindParam(':product_id', $product_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        header('Location: keranjang.php?message=updated');
     } else {
-        echo "Item not found in cart.";
+        echo "Item tidak ditemukan di keranjang.";
     }
-} else {
-    header('Location: keranjang.php');
-    exit();
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
 }
