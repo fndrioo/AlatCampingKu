@@ -215,6 +215,10 @@ if (isset($_GET['message']) && $_GET['message'] === 'deleted'): ?>
             opacity: 1;
             transform: translate(-50%, -50%) translateY(0);
         }
+
+        .btn-hps {
+            border-radius: 10px;
+        }
     </style>
 </head>
 
@@ -305,13 +309,13 @@ if (isset($_GET['message']) && $_GET['message'] === 'deleted'): ?>
                                     <form action="update_keranjang.php" method="post" class="d-inline">
                                         <input type="hidden" name="product_id" value="<?= $item['product_id'] ?>">
                                         <button type="submit" name="action" value="kurangi"
-                                            class="btn btn-sm btn-danger">-</button>
+                                            class="btn-minus btn-sm btn-danger">-</button>
                                     </form>
                                     <span><?= $item['quantity'] ?></span>
                                     <form action="update_keranjang.php" method="post" class="d-inline">
                                         <input type="hidden" name="product_id" value="<?= $item['product_id'] ?>">
                                         <button type="submit" name="action" value="tambah"
-                                            class="btn btn-sm btn-success">+</button>
+                                            class="btn-plus btn-sm btn-success">+</button>
                                     </form>
                                 </td>
                                 <td>Rp. <?= number_format($item_total, 0, ',', '.') ?></td>
@@ -319,7 +323,7 @@ if (isset($_GET['message']) && $_GET['message'] === 'deleted'): ?>
                                     <!-- Tombol hapus produk dari keranjang -->
                                     <form action="hapus_keranjang.php" method="post" class="d-inline">
                                         <input type="hidden" name="product_id" value="<?= $item['product_id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                        <button type="submit" class="btn-hps btn-sm btn-danger">Hapus</button>
                                     </form>
                                 </td>
                             </tr>

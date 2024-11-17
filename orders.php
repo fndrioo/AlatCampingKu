@@ -17,17 +17,22 @@ $limit = 10; // Jumlah pesanan per halaman
 $offset = ($page - 1) * $limit; // Menghitung offset untuk pagination
 
 // Query untuk mengambil pesanan yang terurut berdasarkan tanggal, hanya untuk pengguna yang sedang login
-$sql_orders = "SELECT tb_orders.id AS id_order, 
-       p.nama AS product_name, 
-       tb_orders.quantity AS jumlah, 
-       tb_orders.total_price AS total_harga, 
-       tb_orders.order_date AS status,
-       p.image_url AS image_url
-FROM tb_orders 
-JOIN products p ON tb_orders.product_id = p.product_id
-WHERE tb_orders.user_id = :user_id
-ORDER BY tb_orders.order_date DESC 
-LIMIT :limit OFFSET :offset";
+$sql_orders = "SELECT 
+                o.id AS id_order, 
+                d.product_id, 
+                p.nama AS product_name, 
+                d.quantity AS jumlah, 
+                o.total_price AS total_harga, 
+                o.order_date AS order_date, 
+                p.image_url AS image_url, 
+                d.payment_status AS payment_status
+              FROM tb_orders o
+              JOIN tb_order_details d ON o.id = d.order_id
+              JOIN products p ON d.product_id = p.product_id
+              WHERE o.user_id = :user_id
+              ORDER BY o.order_date DESC
+              LIMIT :limit OFFSET :offset";
+
 
 $stmt_orders = $pdo->prepare($sql_orders);
 $stmt_orders->bindParam(':user_id', $user_id, PDO::PARAM_INT);
@@ -143,11 +148,18 @@ $total_pages = ceil($total_orders / $limit); // Menghitung jumlah halaman
         .pagination .page-item.disabled .page-link {
             color: #ccc;
         }
+
+        .btn-dtl {
+            border-radius: 5px;
+            padding: 7px;
+            margin: 10px;
+        }
     </style>
 
 </head>
 
 <body>
+
     <!-- Navbar Start -->
     <div class="container-fluid position-relative nav-bar p-0">
         <div class="position-relative px-lg-5" style="z-index: 9;">
@@ -160,11 +172,32 @@ $total_pages = ceil($total_orders / $limit); // Menghitung jumlah halaman
                 </button>
                 <div class="collapse navbar-collapse justify-content-between px-3" id="navbarCollapse">
                     <div class="navbar-nav ml-auto py-0">
-                        <a href="indexx.php" class="nav-item nav-link">Home</a>
+                        <a href="indexx.php " class="nav-item nav-link">Home</a>
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Kategori
+                                Peralatan</a>
+                            <div class="dropdown-menu rounded-0 m-0">
+                                <?php foreach ($categories as $category): ?>
+                                    <?php if ($category['name'] == 'Tenda'): ?>
+                                        <a href="tenda.php?category_id=<?= $category['id_category'] ?>"
+                                            class="dropdown-item">Tenda</a>
+                                    <?php elseif ($category['name'] == 'Backpack'): ?>
+                                        <a href="Backpack.php?category_id=<?= $category['id_category'] ?>"
+                                            class="dropdown-item">Backpack</a>
+                                    <?php elseif ($category['name'] == 'Peralatan Masak'): ?>
+                                        <a href="PeralatanMasak.php?category_id=<?= $category['id_category'] ?>"
+                                            class="dropdown-item">Peralatan Masak</a>
+                                    <?php else: ?>
+                                        <a href="product.php?category_id=<?= $category['id_category'] ?>"
+                                            class="dropdown-item"><?= htmlspecialchars($category['name']) ?></a>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
                         <a href="orders.php" class="nav-item nav-link active">Pesanan</a>
                         <a href="keranjang.php" class="nav-item nav-link">Keranjang</a>
                         <a href="profile.php" class="nav-item nav-link">Profil</a>
-                        <a href="index.html" class="nav-item nav-link">Logout</a>
+                        <a href="logout.php" class="nav-item nav-link">Logout</a>
                     </div>
                 </div>
             </nav>
@@ -172,7 +205,7 @@ $total_pages = ceil($total_orders / $limit); // Menghitung jumlah halaman
     </div>
     <!-- Navbar End -->
 
-    <!-- Orders Section Start -->
+    <!-- Orders Table -->
     <div class="container mt-5" data-aos="fade-up">
         <h2 class="mb-4">Pesanan Anda</h2>
         <div class="table-responsive table-container" id="table-container" data-aos="fade-left">
@@ -182,6 +215,7 @@ $total_pages = ceil($total_orders / $limit); // Menghitung jumlah halaman
                         <th>ID Order</th>
                         <th>Tanggal</th>
                         <th>Total Harga</th>
+                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -189,11 +223,23 @@ $total_pages = ceil($total_orders / $limit); // Menghitung jumlah halaman
                     <?php foreach ($orders as $order): ?>
                         <tr>
                             <td><?= htmlspecialchars($order['id_order']) ?></td>
-                            <td><?= htmlspecialchars($order['status']) ?></td>
+                            <td><?= htmlspecialchars($order['order_date']) ?></td>
                             <td>Rp. <?= number_format($order['total_harga'], 0, ',', '.') ?></td>
                             <td>
+                                <?php
+                                // Display payment status with different colors
+                                if ($order['payment_status'] == 'paid') {
+                                    echo '<span class="badge badge-success">Paid</span>';
+                                } elseif ($order['payment_status'] == 'failed') {
+                                    echo '<span class="badge badge-danger">Failed</span>';
+                                } else {
+                                    echo '<span class="badge badge-warning">Pending</span>';
+                                }
+                                ?>
+                            </td>
+                            <td>
                                 <a href="order_detail.php?id=<?= $order['id_order'] ?>"
-                                    class="btn btn-sm btn-primary">Detail</a>
+                                    class="btn-dtl btn-sm btn-primary">Lihat Lebih</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -224,27 +270,41 @@ $total_pages = ceil($total_orders / $limit); // Menghitung jumlah halaman
             </ul>
         </div>
     </div>
-    <!-- Orders Section End -->
 
     <!-- Footer Start -->
-    <div class="container-fluid bg-secondary text-light footer pt-5 pb-4 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <p>&copy; 2024 AlatCampingKu. All rights reserved.</p>
-                </div>
+    <div class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">
+        <div class="row pt-5">
+            <div class="col-lg-3 col-md-6 mb-5">
+                <h4 class="text-uppercase text-primary mb-4">AlatCampingKu</h4>
+                <p class="mb-2"><i class="fa fa-map-marker-alt mr-3"></i>Alamat Anda</p>
+                <p class="mb-2"><i class="fa fa-phone-alt mr-3"></i>+62 123 456 789</p>
+                <p><i class="fa fa-envelope mr-3"></i>info@alatcampingku.com</p>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-5">
+                <h4 class="text-uppercase text-primary mb-4">Ikuti Kami</h4>
+                <p class="mb-2"><i class="fab fa-facebook-f mr-3"></i>Facebook</p>
+                <p class="mb-2"><i class="fab fa-twitter mr-3"></i>Twitter</p>
+                <p class="mb-2"><i class="fab fa-linkedin-in mr-3"></i>LinkedIn</p>
+                <p><i class="fab fa-instagram mr-3"></i>Instagram</p>
             </div>
         </div>
     </div>
     <!-- Footer End -->
 
-    <!-- AOS Library Script -->
+    <!-- JavaScript Libraries -->
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+
+    <!-- AOS Library -->
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+
     <script>
+        // Initialize AOS for animations
         AOS.init();
-        document.addEventListener('DOMContentLoaded', function () {
-            const tableContainer = document.querySelector('#table-container');
-            tableContainer.classList.add('loaded');
+
+        // Trigger fade-in effect for table
+        window.addEventListener('load', function () {
+            document.getElementById('table-container').classList.add('loaded');
         });
     </script>
 </body>

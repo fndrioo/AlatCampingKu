@@ -140,7 +140,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
                                 <p class="card-text">Rp. <?= number_format($product['harga'], 0, ',', '.') ?></p>
                                 <p class="card-text">
                                     Stock: <?= htmlspecialchars($product['stock']) ?>
-                                    <a href="detail.php?id=<?= $product['id'] ?>" class="btn btn-primary btn-sm ml-2">Detail Produk</a>
+                                    <a href="detail.php?id=<?= $product['product_id'] ?>" class="btn btn-primary btn-sm ml-2">Detail Produk</a>
                                 </p>
                             </div>
                         </div>

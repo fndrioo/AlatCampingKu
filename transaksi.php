@@ -30,20 +30,30 @@ foreach ($cart_items as $item) {
     $total_belanja += $item['harga'] * $item['quantity'];
 }
 
-// Fungsi untuk menghasilkan Snap Token
-function getSnapToken($total_belanja)
+// Fungsi untuk mendapatkan Snap Token
+function getSnapToken($order_id, $total_belanja, $user_id, $cart_items)
 {
-    // Server key Midtrans
-    $serverKey = "SB-Mid-server-sSwpNBSHANDCkGZ2JeiEblLZ";
+    $serverKey = "SB-Mid-server-sSwpNBSHANDCkGZ2JeiEblLZ"; // Ganti dengan server key Anda
     $url = "https://app.sandbox.midtrans.com/snap/v1/transactions";
+
+    $item_details = [];
+    foreach ($cart_items as $item) {
+        $item_details[] = [
+            'id' => $item['product_id'],
+            'price' => (int) $item['harga'],
+            'quantity' => (int) $item['quantity'],
+            'name' => $item['nama']
+        ];
+    }
 
     $payload = [
         'transaction_details' => [
-            'order_id' => uniqid(),
+            'order_id' => $order_id,
             'gross_amount' => $total_belanja,
         ],
+        'item_details' => $item_details,
         'customer_details' => [
-            'first_name' => 'John',
+            'first_name' => 'John', // Sesuaikan dengan data user Anda
             'last_name' => 'Doe',
             'email' => 'johndoe@example.com',
             'phone' => '081234567890'
@@ -61,22 +71,27 @@ function getSnapToken($total_belanja)
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 
     $response = curl_exec($ch);
+    if (curl_errno($ch)) {
+        return null;
+    }
     curl_close($ch);
 
     $result = json_decode($response, true);
     return isset($result['token']) ? $result['token'] : null;
 }
 
-// Ambil Snap token baru
-$snapToken = getSnapToken($total_belanja);
+// Buat order_id unik
+$order_id = uniqid('order_', true);
+
+// Ambil Snap token
+$snapToken = getSnapToken($order_id, $total_belanja, $user_id, $cart_items);
 if (!$snapToken) {
-    echo "Gagal mendapatkan Snap Token.";
-    exit();
+    die("Gagal mendapatkan Snap Token. Periksa kembali server key dan koneksi.");
 }
 
-// Reset status pembayaran di session untuk setiap transaksi baru
-unset($_SESSION['transactionResult']);
+// Simpan Snap Token dan order_id dalam sesi
 $_SESSION['snapToken'] = $snapToken;
+$_SESSION['order_id'] = $order_id;
 ?>
 
 <!DOCTYPE html>
@@ -233,167 +248,192 @@ $_SESSION['snapToken'] = $snapToken;
 </head>
 
 <body>
-    <!-- Navbar Start -->
-    <div class="container-fluid position-relative nav-bar p-0">
-        <div class="position-relative px-lg-5" style="z-index: 9;">
-            <nav class="navbar navbar-expand-lg bg-secondary navbar-dark py-3 py-lg-0 pl-3 pl-lg-5">
-                <a href="indexx.php" class="navbar-brand">
-                    <h1 class="text-uppercase text-primary mb-1">AlatCampingKu</h1>
-                </a>
-                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse justify-content-between px-3" id="navbarCollapse">
-                    <div class="navbar-nav ml-auto py-0">
-                        <a href="indexx.php" class="nav-item nav-link">Home</a>
-                        <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Kategori Peralatan</a>
-                            <div class="dropdown-menu rounded-0 m-0">
-                                <?php foreach ($categories as $category): ?>
-                                    <a href="product.php?category_id=<?= $category['id_category'] ?>" class="dropdown-item">
-                                        <?= htmlspecialchars($category['name']) ?>
-                                    </a>
-                                <?php endforeach; ?>
+
+    <body>
+        <!-- Navbar Start -->
+        <div class="container-fluid position-relative nav-bar p-0">
+            <div class="position-relative px-lg-5" style="z-index: 9;">
+                <nav class="navbar navbar-expand-lg bg-secondary navbar-dark py-3 py-lg-0 pl-3 pl-lg-5">
+                    <a href="indexx.php" class="navbar-brand">
+                        <h1 class="text-uppercase text-primary mb-1">AlatCampingKu</h1>
+                    </a>
+                    <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse justify-content-between px-3" id="navbarCollapse">
+                        <div class="navbar-nav ml-auto py-0">
+                            <a href="indexx.php " class="nav-item nav-link">Home</a>
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Kategori
+                                    Peralatan</a>
+                                <div class="dropdown-menu rounded-0 m-0">
+                                    <?php foreach ($categories as $category): ?>
+                                        <?php if ($category['name'] == 'Tenda'): ?>
+                                            <a href="tenda.php?category_id=<?= $category['id_category'] ?>"
+                                                class="dropdown-item">Tenda</a>
+                                        <?php elseif ($category['name'] == 'Backpack'): ?>
+                                            <a href="Backpack.php?category_id=<?= $category['id_category'] ?>"
+                                                class="dropdown-item">Backpack</a>
+                                        <?php elseif ($category['name'] == 'Peralatan Masak'): ?>
+                                            <a href="PeralatanMasak.php?category_id=<?= $category['id_category'] ?>"
+                                                class="dropdown-item">Peralatan Masak</a>
+                                        <?php else: ?>
+                                            <a href="product.php?category_id=<?= $category['id_category'] ?>"
+                                                class="dropdown-item"><?= htmlspecialchars($category['name']) ?></a>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </div>
                             </div>
+                            <a href="orders.php" class="nav-item nav-link">Pesanan</a>
+                            <a href="keranjang.php" class="nav-item nav-link">Keranjang</a>
+                            <a href="profile.php" class="nav-item nav-link">Profil</a>
+                            <a href="logout.php" class="nav-item nav-link">Logout</a>
                         </div>
-                        <a href="orders.php" class="nav-item nav-link">Pesanan</a>
-                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                            <a href="adminpanel.php" class="nav-item nav-link">Admin Panel</a>
-                        <?php endif; ?>
-                        <a href="keranjang.php" class="nav-item nav-link">Keranjang</a>
-                        <a href="profile.php" class="nav-item nav-link">Profil</a>
-                        <a href="index.html" class="nav-item nav-link">Logout</a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+        <!-- Navbar End -->
+
+        <!-- Transaction Start -->
+        <div class="container mt-5">
+            <h2 class="text-center mb-4">Transaksi Anda</h2>
+            <div class="transaction-container">
+                <div class="product-container" data-aos="fade-right">
+                    <div class="detail-pesanan mb-4">
+                        <?php foreach ($cart_items as $item): ?>
+                            <div class="product-item" data-aos="fade-right">
+                                <div class="product-image">
+                                    <img src="<?= $item['image_url'] ?>" alt="<?= htmlspecialchars($item['nama']) ?>">
+                                </div>
+                                <div class="product-details">
+                                    <h5><?= htmlspecialchars($item['nama']) ?></h5>
+                                    <p>Harga: Rp <?= number_format($item['harga'], 0, ',', '.') ?></p>
+                                    <p>Jumlah: <?= $item['quantity'] ?></p>
+                                    <p class="product-summary">Subtotal: Rp
+                                        <?= number_format($item['harga'] * $item['quantity'], 0, ',', '.') ?>
+                                    </p>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <h4 data-aos="fade-up" data-aos-offset="0">Total Belanja: Rp
+                        <?= number_format($total_belanja, 0, ',', '.') ?>
+                    </h4>
+                    <button id="checkoutButton">Bayar Sekarang</button>
+                </div>
+
+                <div class="form-container" data-aos="fade-left">
+                    <div class="form-dates">
+                        <h4>Pengambilan & Pengembalian</h4>
+                        <label for="tanggal_pengambilan">Tanggal Pengambilan</label>
+                        <input type="date" id="tanggal_pengambilan" name="tanggal_pengambilan" required>
+                        <label for="tanggal_pengembalian">Tanggal Pengembalian</label>
+                        <input type="date" id="tanggal_pengembalian" name="tanggal_pengembalian" required>
                     </div>
                 </div>
-            </nav>
-        </div>
-    </div>
-    <!-- Navbar End -->
-
-     <!-- Transaction Start -->
-     <div class="container mt-5">
-        <h2 class="text-center mb-4">Transaksi Anda</h2>
-        <div class="transaction-container">
-            <div class="product-container" data-aos="fade-right">
-                <div class="detail-pesanan mb-4">
-                    <?php foreach ($cart_items as $item): ?>
-                        <div class="product-item" data-aos="fade-right">
-                            <div class="product-image">
-                                <img src="<?= $item['image_url'] ?>" alt="Product Image">
-                            </div>
-                            <div class="product-details">
-                                <h5><?= $item['nama'] ?></h5>
-                                <p>Harga: Rp <?= number_format($item['harga'], 0, ',', '.') ?></p>
-                                <p>Jumlah: <?= $item['quantity'] ?></p>
-                                <p class="product-summary">Subtotal: Rp
-                                    <?= number_format($item['harga'] * $item['quantity'], 0, ',', '.') ?>
-                                </p>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-                <h4 data-aos="fade-up" data-aos-offset="0">Total Belanja: Rp
-                    <?= number_format($total_belanja, 0, ',', '.') ?>
-                </h4>
-                <button id="checkoutButton" data-aos="fade-up" data-aos-offset="0">Bayar Sekarang</button>
-            </div>
-
-            <div class="form-container" data-aos="fade-left">
-                <div class="form-dates">
-                    <h4>Pengambilan & Pengembalian</h4>
-                    <label for="tanggal_pengambilan">Tanggal Pengambilan</label>
-                    <input type="date" id="tanggal_pengambilan" name="tanggal_pengambilan" required>
-                    <label for="tanggal_pengembalian">Tanggal Pengembalian</label>
-                    <input type="date" id="tanggal_pengembalian" name="tanggal_pengembalian" required>
-                    <button type="button" id="checkoutButton" data-snap-token="<?= $snapToken ?>" onclick="processPayment()">Bayar Sekarang</button>
-                </div>
             </div>
         </div>
-    </div>
-    <!-- Transaction End -->
+        <!-- Transaction End -->
 
-    <!-- jQuery and Bootstrap Bundle -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- jQuery and Bootstrap Bundle -->
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
-     <!-- Script untuk Midtrans -->
-     <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-7983Gt8MB7gdojyE"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        document.getElementById('checkoutButton').addEventListener('click', function () {
-            if ("<?= $_SESSION['snapToken'] ?>" === "") {
-                alert("Snap Token tidak ditemukan.");
-                return;
-            }
-            snap.pay("<?= $_SESSION['snapToken'] ?>", {
-                onSuccess: function (result) {
-                    $.ajax({
-                        url: 'simpan_transaksi.php',
-                        type: 'POST',
-                        data: {
-                            user_id: <?= $user_id ?>,
-                            order_id: result.order_id,
-                            gross_amount: result.gross_amount,
-                            payment_type: result.payment_type,
-                            transaction_status: result.transaction_status
+        <!-- Script Midtrans -->
+        <script src="https://app.sandbox.midtrans.com/snap/snap.js"
+            src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://app.sandbox.midtrans.com/snap/snap.js"
+            data-client-key="SB-Mid-client-7983Gt8MB7gdojyE"></script>
+        <script>
+            $(document).ready(function () {
+                $('#checkoutButton').click(function () {
+                    const snapToken = <?= json_encode($_SESSION['snapToken']); ?>;
+
+                    if (!snapToken) {
+                        alert('Gagal memuat token pembayaran.');
+                        return;
+                    }
+
+                    snap.pay(snapToken, {
+                        onSuccess: function (result) {
+                            alert('Pembayaran berhasil!');
+                            console.log(result);
+
+                            const order_id = <?= json_encode($_SESSION['order_id']); ?>;
+                            const user_id = <?= json_encode($user_id); ?>;
+                            const total_price = <?= $total_belanja; ?>;
+                            const cart_items = <?= json_encode($cart_items); ?>;
+
+                            $.ajax({
+                                url: 'proses_checkout.php',
+                                method: 'POST',
+                                data: {
+                                    order_id: order_id,
+                                    user_id: user_id,
+                                    total_price: total_price,
+                                    cart_items: cart_items,
+                                    transaction_status: 'success',
+                                },
+                                success: function (response) {
+                                    console.log(response);
+                                    window.location.href = 'success.php'; // Redirect ke halaman sukses
+                                },
+                                error: function (error) {
+                                    alert('Gagal menyimpan transaksi.');
+                                    console.log(error);
+                                }
+                            });
                         },
-                        success: function(response) {
-                            alert("Transaksi berhasil dan data disimpan ke database");
-                            console.log(response);
+                        onPending: function (result) {
+                            alert('Pembayaran tertunda. Silakan selesaikan pembayaran.');
+                            console.log(result);
                         },
-                        error: function() {
-                            alert("Gagal menyimpan transaksi. Silakan coba lagi.");
+                        onError: function (result) {
+                            alert('Terjadi kesalahan saat pembayaran.');
+                            console.log(result);
                         }
                     });
-                },
-                onPending: function (result) {
-                    alert("Waiting for payment confirmation!");
-                    console.log(result);
-                },
-                onError: function (result) {
-                    alert("Payment Error!");
-                    console.log(result);
-                }
+                });
             });
-        });
-    </script>
+        </script>
 
-    <!-- Footer Start -->
-    <div class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">
-        <div class="row pt-5">
-            <div class="col-lg-3 col-md-6 mb-5">
-                <h4 class="text-uppercase text-primary mb-4">AlatCampingKu</h4>
-                <p class="mb-2"><i class="fa fa-map-marker-alt mr-3"></i>Alamat Anda</p>
-                <p class="mb-2"><i class="fa fa-phone-alt mr-3"></i>+62 123 456 789</p>
-                <p><i class="fa fa-envelope mr-3"></i>info@alatcampingku.com</p>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-5">
-                <h4 class="text-uppercase text-primary mb-4">Ikuti Kami</h4>
-                <p class="mb-2"><i class="fab fa-facebook-f mr-3"></i>Facebook</p>
-                <p class="mb-2"><i class="fab fa-twitter mr-3"></i>Twitter</p>
-                <p class="mb-2"><i class="fab fa-linkedin-in mr-3"></i>LinkedIn</p>
-                <p><i class="fab fa-instagram mr-3"></i>Instagram</p>
+        <!-- Footer Start -->
+        <div class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">
+            <div class="row pt-5">
+                <div class="col-lg-3 col-md-6 mb-5">
+                    <h4 class="text-uppercase text-primary mb-4">AlatCampingKu</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt mr-3"></i>Alamat Anda</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt mr-3"></i>+62 123 456 789</p>
+                    <p><i class="fa fa-envelope mr-3"></i>info@alatcampingku.com</p>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-5">
+                    <h4 class="text-uppercase text-primary mb-4">Ikuti Kami</h4>
+                    <p class="mb-2"><i class="fab fa-facebook-f mr-3"></i>Facebook</p>
+                    <p class="mb-2"><i class="fab fa-twitter mr-3"></i>Twitter</p>
+                    <p class="mb-2"><i class="fab fa-linkedin-in mr-3"></i>LinkedIn</p>
+                    <p><i class="fab fa-instagram mr-3"></i>Instagram</p>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- Footer End -->
+        <!-- Footer End -->
 
-    <!-- AOS JS -->
-    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        AOS.init({
-            duration: 850, // Durasi animasi
-            once: true,    // Animasi hanya terjadi sekali saat halaman dimuat
-            easing: 'ease-out', // Easing animasi
-        });
-    </script>
+        <!-- AOS JS -->
+        <script src="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.js"></script>
+        <script>
+            AOS.init({
+                duration: 850, // Durasi animasi
+                once: true,    // Animasi hanya terjadi sekali saat halaman dimuat
+                easing: 'ease-out', // Easing animasi
+            });
+        </script>
 
-    <!-- Link CSS AOS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+        <!-- Link CSS AOS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
 
-    <!-- Script JS AOS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+        <!-- Script JS AOS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 
-</body>
+    </body>
 
 </html>
