@@ -19,20 +19,19 @@ $offset = ($page - 1) * $limit; // Menghitung offset untuk pagination
 // Query untuk mengambil pesanan yang terurut berdasarkan tanggal, hanya untuk pengguna yang sedang login
 $sql_orders = "SELECT 
                 o.id AS id_order, 
-                d.product_id, 
-                p.nama AS product_name, 
-                d.quantity AS jumlah, 
+                GROUP_CONCAT(d.product_id) AS product_ids, 
+                SUM(d.quantity) AS total_quantity, 
                 o.total_price AS total_harga, 
-                o.order_date AS order_date, 
-                p.image_url AS image_url, 
-                d.payment_status AS payment_status
+                o.order_date AS order_date,
+                d.payment_status AS payment_status,
+                GROUP_CONCAT(p.image_url) AS image_urls
               FROM tb_orders o
               JOIN tb_order_details d ON o.id = d.order_id
               JOIN products p ON d.product_id = p.product_id
               WHERE o.user_id = :user_id
+              GROUP BY o.id
               ORDER BY o.order_date DESC
               LIMIT :limit OFFSET :offset";
-
 
 $stmt_orders = $pdo->prepare($sql_orders);
 $stmt_orders->bindParam(':user_id', $user_id, PDO::PARAM_INT);

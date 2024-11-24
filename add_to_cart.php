@@ -15,11 +15,13 @@ if (isset($_POST['product_id'], $_POST['quantity'])) {
 
     if ($product) {
         // Tambahkan produk ke tabel tb_keranjang
-        $stmt = $pdo->prepare("INSERT INTO tb_keranjang (user_id, product_id, quantity) VALUES (:user_id, :product_id, :quantity)
-            ON DUPLICATE KEY UPDATE quantity = quantity + :quantity");
+        $stmt = $pdo->prepare("INSERT INTO tb_keranjang (user_id, product_id, quantity) 
+            VALUES (:user_id, :product_id, :quantity)
+            ON DUPLICATE KEY UPDATE quantity = quantity + :update_quantity");
         $stmt->bindParam(':user_id', $user_id);
         $stmt->bindParam(':product_id', $product_id);
         $stmt->bindParam(':quantity', $quantity);
+        $stmt->bindParam(':update_quantity', $quantity); // Bind ulang dengan nama parameter berbeda
         $stmt->execute();
 
         // Redirect atau set notifikasi

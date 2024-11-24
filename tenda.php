@@ -78,20 +78,52 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
         }
 
         /* Animasi untuk card produk */
-        .card {
-            opacity: 0;
-            /* Awalnya tidak terlihat */
-            transform: translateY(20px);
-            /* Bergeser ke bawah */
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            /* Transisi yang mulus */
+        .card-transaksi {
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background-color: #fff;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .card.visible {
-            opacity: 1;
-            /* Menjadi terlihat */
-            transform: translateY(0);
-            /* Kembali ke posisi semula */
+        .card-transaksi:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-transaksi .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .card-transaksi .card-text {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .card-transaksi .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: #f77d0a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .btn-sekarang {
+            width: 100%;
+            padding: 12px;
+            background-color: #f77d0a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -111,7 +143,8 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
                     <div class="navbar-nav ml-auto py-0">
                         <a href="indexx.php" class="nav-item nav-link">Home</a>
                         <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle active" data-toggle="dropdown">Kategori Peralatan</a>
+                            <a href="#" class="nav-link dropdown-toggle active" data-toggle="dropdown">Kategori
+                                Peralatan</a>
                             <div class="dropdown-menu rounded-0 m-0">
                                 <?php foreach ($categories as $category): ?>
                                     <?php if ($category['name'] == 'Tenda'): ?>
@@ -156,7 +189,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
             // Tampilkan 3 produk yang diambil
             foreach ($featured_products as $product): ?>
                 <div class="col-md-4 mb-3">
-                    <div class="card">
+                    <div class="card card-transaksi shadow-sm">
                         <img class="card-img-top" src="<?= htmlspecialchars($product['image_url']) ?>"
                             alt="<?= htmlspecialchars($product['nama']) ?>">
                         <div class="card-body">
@@ -164,7 +197,8 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC); // Simpan hasil query ke dalam va
                             <p class="card-text">Rp. <?= number_format($product['harga'], 0, ',', '.') ?></p>
                             <p class="card-text">
                                 Stock: <?= htmlspecialchars($product['stock']) ?>
-                                <a href="detail.php?id=<?= $product['product_id'] ?>" class="btn btn-primary btn-sm ml-2">Detail
+                                <a href="detail.php?id=<?= $product['product_id'] ?>"
+                                    class="btn btn-primary btn-sm ml-2">Detail
                                     Produk</a>
                             </p>
                         </div>

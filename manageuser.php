@@ -111,7 +111,7 @@ $total_pages = ceil($total_users / $limit);
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-secondary navbar-dark py-3 px-4" data-aos="fade-down">
         <a href="indexx.html" class="navbar-brand">
-            <h1 class="text-uppercase text-primary mb-1">Admin Panel - AlatCampingKu</h1>
+            <h1 class="text-uppercase text-primary mb-1">Admin Panel</h1>
         </a>
         <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
             <span class="navbar-toggler-icon"></span>

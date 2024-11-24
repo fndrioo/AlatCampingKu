@@ -111,8 +111,8 @@ $total_users = getTotalUsers($pdo);
     <div class="wrapper">
         <!-- Navbar Start -->
         <nav class="navbar navbar-expand-lg bg-secondary navbar-dark py-3 px-4">
-            <a href="indexx.html" class="navbar-brand">
-                <h1 class="text-uppercase text-primary mb-1">Admin Panel - AlatCampingKu</h1>
+            <a href="adminpanel.php" class="navbar-brand">
+                <h1 class="text-uppercase text-primary mb-1">Admin Panel</h1>
             </a>
             <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
                 <span class="navbar-toggler-icon"></span>
@@ -143,7 +143,6 @@ $total_users = getTotalUsers($pdo);
             <!-- Main Content Start -->
             <div class="main-content">
                 <h2 data-aos="fade-down">Dashboard</h2>
-                <p data-aos="fade-up">Selamat datang di Admin Panel AlatCampingKu.</p>
 
                 <div class="row">
                     <div class="col-md-4" data-aos="fade-up">

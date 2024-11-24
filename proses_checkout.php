@@ -112,6 +112,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt_update_order->bindParam(':order_id', $order_id, PDO::PARAM_INT);
         $stmt_update_order->execute();
 
+        // Hapus barang dari keranjang
+        $sql_delete_cart = "DELETE FROM tb_keranjang WHERE user_id = :user_id";
+        $stmt_delete_cart = $pdo->prepare($sql_delete_cart);
+        $stmt_delete_cart->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+
         // Kembalikan token dan order_id
         echo json_encode(['snapToken' => $result['token'], 'order_id' => $order_id]);
     } else {

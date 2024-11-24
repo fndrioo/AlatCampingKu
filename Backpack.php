@@ -1,7 +1,7 @@
 <?php
 // Inisialisasi koneksi PDO
 $host = 'localhost';
-$dbname = 'db_alatacampingku'; // Ganti dengan nama database Anda
+$dbname = 'db_alatcampingkuu'; // Ganti dengan nama database Anda
 $username = 'root'; // Sesuaikan dengan username database Anda
 $password = ''; // Sesuaikan dengan password database Anda
 

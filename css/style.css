@@ -85,6 +85,54 @@ h6,
     outline: none;
 }
 
+.card-transaksi {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    background-color: #fff;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-transaksi:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card-transaksi .card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.card-transaksi .card-text {
+    font-size: 1rem;
+    color: #666;
+}
+
+.card-transaksi .btn-primary {
+    width: 100%;
+    padding: 12px;
+    background-color: #f77d0a;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+}
+
+.btn-sekarang {
+    width: 100%;
+    padding: 12px;
+    background-color: #f77d0a;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+}
+
 .navbar-dark .navbar-nav .nav-link:hover,
 .navbar-dark .navbar-nav .nav-link.active {
     color: var(--primary);

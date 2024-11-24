@@ -365,6 +365,7 @@ $_SESSION['order_id'] = $order_id;
                             const total_price = <?= $total_belanja; ?>;
                             const cart_items = <?= json_encode($cart_items); ?>;
 
+                            // Simpan data transaksi ke database melalui AJAX
                             $.ajax({
                                 url: 'proses_checkout.php',
                                 method: 'POST',
@@ -377,7 +378,7 @@ $_SESSION['order_id'] = $order_id;
                                 },
                                 success: function (response) {
                                     console.log(response);
-                                    window.location.href = 'success.php'; // Redirect ke halaman sukses
+                                    window.location.href = 'orders.php?order_id=' + order_id;
                                 },
                                 error: function (error) {
                                     alert('Gagal menyimpan transaksi.');

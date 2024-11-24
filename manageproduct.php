@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-secondary navbar-dark py-3 px-4">
         <a href="indexx.html" class="navbar-brand">
-            <h1 class="text-uppercase text-primary mb-1">Admin Panel - AlatCampingKu</h1>
+            <h1 class="text-uppercase text-primary mb-1">Admin Panel</h1>
         </a>
         <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
             <span class="navbar-toggler-icon"></span>
@@ -147,7 +147,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="col-lg-10 flex-grow-1">
                         <div class="container p-4">
                             <h2>Manage Products</h2>
-                            <p>Here you can manage all the products listed on AlatCampingKu.</p>
 
                             <!-- Add Product Button -->
                             <div class="mb-4">
@@ -171,14 +170,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <tbody>
                                     <?php foreach ($products as $product): ?>
                                         <tr>
-                                            <td><?= $product['id'] ?></td>
+                                            <td><?= $product['product_id'] ?></td>
                                             <td><?= $product['nama'] ?></td>
                                             <td><?= $product['kategori'] ?></td>
                                             <td>Rp. <?= number_format($product['harga'], 0, ',', '.') ?></td>
                                             <td><?= $product['stock'] ?></td>
                                             <td>
                                                 <button class="btn btn-sm btn-warning" data-toggle="modal"
-                                                    data-target="#productModal" data-id="<?= $product['id'] ?>"
+                                                    data-target="#productModal" data-id="<?= $product['product_id'] ?>"
                                                     data-nama="<?= $product['nama'] ?>"
                                                     data-kategori="<?= $product['kategori'] ?>"
                                                     data-harga="<?= $product['harga'] ?>"
@@ -186,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                     data-image_url="<?= $product['image_url'] ?>"
                                                     data-description="<?= $product['description'] ?>">Edit</button>
                                                 <form action="" method="POST" style="display:inline-block;">
-                                                    <input type="hidden" name="id" value="<?= $product['id'] ?>">
+                                                    <input type="hidden" name="id" value="<?= $product['product_id'] ?>">
                                                     <button type="submit" name="delete_product"
                                                         class="btn btn-sm btn-danger"
                                                         onclick="return confirm('Are you sure you want to delete this product?');">Delete</button>
